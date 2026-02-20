@@ -1,0 +1,5429 @@
+\documentclass[12pt]{article}
+
+%––––– Packages –––––
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{import}
+\usepackage{xifthen}
+\usepackage{pdfpages}
+\usepackage{transparent}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{physics}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{cancel}
+\usepackage{bm}
+
+  \usetikzlibrary{calc,patterns,arrows.meta,decorations.markings}
+
+%––––– Custom macros –––––
+\newcommand{\incfig}[1]{%%
+    \def\svgwidth{\columnwidth}%%
+    \import{./Figures/}{##1.pdf_tex}%%
+}
+
+%––––– Theorem styles –––––
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{problem}{Problem}
+\newtheorem{solution}{Solution}
+\newtheorem{remark}{Remark}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+%––––– Meta –––––
+\title{TAM 551: Solid Mechanics I\thanks{Compiled by Jerich Lee}}
+\author{Petros Sofronis}
+\date{11/01/2025}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\pagebreak
+
+% Your content starts here.
+\section{Mathematical Preliminaries}
+\subsection{Indicial Notation and Tensor Operations}
+
+---
+
+\subsubsection{Summation Convention}
+
+Consider the sum:
+\[
+S = a_1 x_1 + a_2 x_2 + a_3 x_3 = \sum_{i=1}^{3} a_i x_i = a_i x_i
+\]
+Repeated indices (called \emph{dummy indices}) imply summation from \(1\) to \(3\).  
+Indices that appear only once in a term are called \emph{free indices} and denote tensor components.
+
+---
+
+\subsubsection{Example}
+
+A system of linear equations:
+\[
+\begin{cases}
+A_{11}x_1 + A_{12}x_2 + A_{13}x_3 = b_1,\\
+A_{21}x_1 + A_{22}x_2 + A_{23}x_3 = b_2,\\
+A_{31}x_1 + A_{32}x_2 + A_{33}x_3 = b_3,
+\end{cases}
+\]
+is written compactly as:
+\[
+A_{ij}x_j = b_i
+\]
+where \(i\) is free (ranges over the three equations), and \(j\) is dummy (summed over).
+
+---
+
+\subsubsection{Transformation of Components}
+
+If \(O_{ij}\) is a transformation matrix, then:
+\[
+A'_i = O_{ij} A_j
+\]
+Here, \(i\) is a free index and \(j\) is dummy.
+
+---
+
+\subsection{Kronecker Delta}
+
+\[
+\boxed{
+\delta_{ij} =
+\begin{cases}
+1, & i = j,\\
+0, & i \neq j.
+\end{cases}
+}
+\]
+
+Properties:
+\[
+\delta_{ij} = \delta_{ji}, \quad \delta_{ii} = 3, \quad \delta_{ik}\delta_{kj} = \delta_{ij}.
+\]
+
+Useful relations:
+\[
+a_i = \delta_{ij}a_j, \qquad A_{ik}\delta_{kj} = A_{ij}.
+\]
+For an orthonormal basis \((\mathbf{e}_1, \mathbf{e}_2, \mathbf{e}_3)\):
+\[
+\mathbf{e}_i \cdot \mathbf{e}_j = \delta_{ij}, \quad
+\mathbf{a} \cdot \mathbf{b} = a_i b_i = |\mathbf{a}||\mathbf{b}|\cos\theta.
+\]
+
+---
+
+\subsection{Alternating Symbol (Levi-Civita Tensor)}
+
+\[
+\boxed{
+\varepsilon_{ijk} =
+\begin{cases}
++1, & \text{if } (ijk) \text{ is even (e.g. } 123, 231, 312),\\
+-1, & \text{if } (ijk) \text{ is odd (e.g. } 132, 321, 213),\\
+0, & \text{if any two indices are equal.}
+\end{cases}
+}
+\]
+
+Properties:
+\[
+\varepsilon_{ijk} = -\varepsilon_{jik} = -\varepsilon_{ikj}, \quad
+\varepsilon_{ijk}\varepsilon_{ijk} = 6.
+\]
+
+Compact expression:
+\[
+\varepsilon_{ijk} = \tfrac{1}{2}(i-j)(j-k)(k-i)
+\]
+
+---
+
+\subsubsection{Vector Products}
+
+For unit basis vectors:
+\[
+\mathbf{e}_i \times \mathbf{e}_j = \varepsilon_{ijk}\mathbf{e}_k.
+\]
+
+\paragraph{Cross product:}
+\[
+(\mathbf{a} \times \mathbf{b})_i = \varepsilon_{ijk} a_j b_k.
+\]
+
+\paragraph{Triple product:}
+\[
+(\mathbf{a} \times \mathbf{b}) \cdot \mathbf{c} = \varepsilon_{ijk} a_i b_j c_k.
+\]
+
+---
+
+\subsubsection{Useful Identities}
+
+\[
+\varepsilon_{ijk}\varepsilon_{ilm} = 
+\delta_{jl}\delta_{km} - \delta_{jm}\delta_{kl}.
+\]
+
+\[
+(\mathbf{a} \times \mathbf{b}) \times \mathbf{c}
+= \varepsilon_{ijk}\varepsilon_{klm}a_j b_l c_m
+= (a_i b_j c_j - a_j b_i c_j)
+= \mathbf{b}(\mathbf{a} \cdot \mathbf{c}) - \mathbf{a}\]
+\subsection{Matrix Theory in Index Notation}
+
+---
+
+\subsubsection{Matrix Representation}
+
+\[
+[A] =
+\begin{bmatrix}
+A_{11} & \dots & A_{1n} \\
+\vdots & \ddots & \vdots \\
+A_{m1} & \dots & A_{mn}
+\end{bmatrix}
+\]
+
+For matrix multiplication:
+\[
+[C] = [A][B] \quad \Rightarrow \quad C_{ij} = A_{ik}B_{kj}.
+\]
+
+---
+
+\subsubsection{Transpose and Symmetry}
+
+\[
+[A^T]_{ij} = A_{ji}.
+\]
+
+\[
+\text{Symmetric: } A_{ij} = A_{ji}, \quad
+\text{Antisymmetric: } A_{ij} = -A_{ji}.
+\]
+
+---
+
+\subsection{Determinant}
+
+\[
+\boxed{
+\det[A] = \varepsilon_{ijk}A_{1i}A_{2j}A_{3k}
+}
+\]
+(for a \(3\times3\) matrix).
+
+Alternatively:
+\[
+\det[A] = \sum_{i,j,k=1}^3 \varepsilon_{ijk} A_{pi}A_{qj}A_{rk}
+\]
+where \((p,q,r)\) are fixed row indices.
+
+---
+
+\subsubsection{Minor and Cofactor}
+
+- **Minor:** \( M_{ij} \) is the determinant of the submatrix obtained by deleting the \(i\)th row and \(j\)th column.
+- **Cofactor:** \( C_{ij} = (-1)^{i+j} M_{ij} \).
+
+Example for a \(2\times2\) matrix:
+\[
+C_{11} = A_{22}, \quad C_{22} = A_{11}, \quad
+C_{12} = -A_{21}, \quad C_{21} = -A_{12}.
+\]
+Hence:
+\[
+\det[A] = A_{11}A_{22} - A_{12}A_{21}.
+\]
+
+---
+
+\subsubsection{Properties of Determinants}
+
+\begin{enumerate}
+\item If all elements of any row or column are zero, then \(\det[A]=0.\)
+\item Interchanging two rows (or columns) changes the sign of the determinant.
+\item \(\det[A] = \det[A^T].\)
+\item \(\det[AB] = \det[A]\det[B].\)
+\end{enumerate}
+
+---
+
+\subsubsection{Row and Column Expansions}
+
+\[
+\det[A] = \varepsilon_{ijk}A_{1i}A_{2j}A_{3k} = \varepsilon_{ijk}A_{i1}A_{j2}A_{k3}.
+\]
+
+---
+
+\begin{proof}[Column Expansion]
+Using \(\det[A^T] = \det[A]\):
+\[
+\det[A^T] = \varepsilon_{ijk}A_{ip}A_{jq}A_{kr}
+\quad \Rightarrow \quad
+\det[A] = \varepsilon_{ijk}A_{pi}A_{qj}A_{rk}.
+\]
+\end{proof}
+---
+
+\begin{proof}[Determinant Multiplication Theorem]
+ 
+Let \( [C] = [A][B] \Rightarrow C_{ij} = A_{ik}B_{kj}. \)
+
+\[
+\det[C] = \varepsilon_{ijk}C_{1i}C_{2j}C_{3k}
+= \varepsilon_{ijk}A_{1p}A_{2q}A_{3r}B_{pi}B_{qj}B_{rk}.
+\]
+
+Using the identity:
+\[
+\varepsilon_{ijk}B_{pi}B_{qj}B_{rk} = (\det B)\varepsilon_{pqr},
+\]
+we obtain:
+\[
+\det[C] = (\det A)(\det B).
+\]
+
+ 
+\end{proof}
+\subsubsection{Proof: }
+---
+
+\subsection{Properties of Levi-Civita Symbol}
+
+\[
+\varepsilon_{ijk}\varepsilon_{ipq} = 
+\begin{vmatrix}
+\delta_{jp} & \delta_{jq} \\
+\delta_{kp} & \delta_{kq}
+\end{vmatrix}
+= \delta_{jq}\delta_{kp} - \delta_{jp}\delta_{kq}.
+\]
+
+\[
+\varepsilon_{ijk}\varepsilon_{ijk} = 6, \quad
+\varepsilon_{ijk}\varepsilon_{ijp} = 2\delta_{kp}, \quad
+\varepsilon_{ijk}\varepsilon_{ipq} = \delta_{jp}\delta_{kq} - \delta_{jq}\delta_{kp}.
+\]
+
+---
+
+\subsection{Determinant Identity (Vector Form)}
+
+\[
+\boxed{
+\det[A] = \tfrac{1}{6}\varepsilon_{ijk}\varepsilon_{pqr}A_{ip}A_{jq}A_{kr}
+}
+\]
+
+Proof:
+
+\[
+\varepsilon_{ijk}\varepsilon_{pqr}A_{ip}A_{jq}A_{kr}
+= \varepsilon_{ijk}\varepsilon_{ijk}\det[A]
+= 6\det[A].
+\]
+
+---
+
+\subsection{Existence of the Inverse Matrix}
+
+A necessary and sufficient condition for the inverse of \(A\) to exist is:
+\[
+\det[A] \neq 0.
+\]
+
+Then:
+\[
+[A][A^{-1}] = [I] = [A^{-1}][A],
+\quad I_{ij} = \delta_{ij}.
+\]
+
+---
+
+\subsubsection{Inverse in Index Notation}
+
+\[
+\boxed{
+A^{-1}_{ij} = \frac{1}{2\det[A]} \varepsilon_{ilm}\varepsilon_{jnp}A_{mn}A_{lp}
+}
+\]
+
+Proof sketch:
+
+Start from \(\det[A] = \varepsilon_{ijk}A_{1i}A_{2j}A_{3k}\)  
+and differentiate w.r.t. \(A_{rs}\) to obtain the cofactor structure, then use:
+\[
+A_{ik}A^{-1}_{kj} = \delta_{ij}.
+\]
+
+---
+
+\subsection{Summary of Key Determinant Relations}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l @{}}
+\toprule
+\textbf{Identity} & \textbf{Expression} \\
+\midrule
+Row expansion & $\displaystyle \det[A] = \varepsilon_{ijk} A_{1i} A_{2j} A_{3k}$ \\[4pt]
+Column expansion & $\displaystyle \det[A] = \varepsilon_{ijk} A_{i1} A_{j2} A_{k3}$ \\[4pt]
+Transpose & $\displaystyle \det[A^T] = \det[A]$ \\[4pt]
+Product & $\displaystyle \det[AB] = \det[A] \, \det[B]$ \\[4pt]
+Inverse & $\displaystyle A^{-1}_{ij} = 
+\frac{1}{2\,\det[A]} \, \varepsilon_{ilm} \varepsilon_{jnp} A_{mn} A_{lp}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\subsection{Coordinate Transformations and Tensor Transformations}
+
+---
+
+\subsubsection{Coordinate Systems}
+
+Let the base vectors of the original coordinate system be 
+\[
+(\mathbf{e}_1, \mathbf{e}_2, \mathbf{e}_3),
+\]
+and the coordinates of a point \(P\) be \(X = (X_1, X_2, X_3)\).  
+Then the position vector is:
+\[
+\mathbf{x} = X_i \mathbf{e}_i.
+\]
+
+After a rigid rotation of the coordinate axes about the origin, the new base vectors are 
+\[
+(\mathbf{e}_1', \mathbf{e}_2', \mathbf{e}_3'),
+\]
+and the same position vector can be written as:
+\[
+\mathbf{x} = X_i' \mathbf{e}_i'.
+\]
+
+---
+
+\subsubsection{Transformation Matrix}
+
+The transformation between the two coordinate bases is given by:
+\[
+Q_{ij} = \mathbf{e}_i' \cdot \mathbf{e}_j = \cos(\mathbf{e}_i', \mathbf{e}_j),
+\]
+where \(Q_{ij}\) is the **direction cosine matrix** (orthogonal transformation matrix).
+
+Thus:
+\[
+\mathbf{e}_i' = Q_{ij} \mathbf{e}_j, 
+\quad
+\mathbf{e}_i = Q_{ji} \mathbf{e}_j'.
+\]
+
+---
+
+\subsubsection{Orthogonal Transformation Relations}
+
+Since the base vectors are orthonormal:
+\[
+\mathbf{e}_i \cdot \mathbf{e}_j = \delta_{ij},
+\quad
+\mathbf{e}_i' \cdot \mathbf{e}_j' = \delta_{ij}.
+\]
+
+Using \( \mathbf{e}_i' = Q_{ij} \mathbf{e}_j \):
+\[
+\mathbf{e}_i' \cdot \mathbf{e}_j' = Q_{ik}Q_{jl}\mathbf{e}_k \cdot \mathbf{e}_l
+= Q_{ik}Q_{jl}\delta_{kl}
+= Q_{ik}Q_{jk} = \delta_{ij}.
+\]
+
+Hence:
+\[
+\boxed{
+Q_{ik}Q_{jk} = Q_{ki}Q_{kj} = \delta_{ij}
+\quad \Rightarrow \quad
+[Q][Q]^T = [Q]^T[Q] = [I].
+}
+\]
+
+This shows that \( [Q] \) is an orthogonal matrix and
+\[
+Q^{-1} = Q^T.
+\]
+
+---
+
+\subsubsection{Transformation of Coordinates}
+
+Since
+\[
+\mathbf{x} = X_i \mathbf{e}_i = X_i' \mathbf{e}_i',
+\]
+we have:
+\[
+X_i = Q_{ij}X_j',
+\quad
+X_i' = Q_{ji}X_j.
+\]
+
+Thus, the coordinates transform by \( [Q] \) and its transpose.
+
+---
+
+\subsubsection{Example: Rotation About \( \mathbf{e}_3 \)}
+
+For a rotation by an angle \( \theta \) about \( \mathbf{e}_3 \):
+\[
+[Q] =
+\begin{bmatrix}
+\cos\theta & \sin\theta & 0 \\
+-\sin\theta & \cos\theta & 0 \\
+0 & 0 & 1
+\end{bmatrix}.
+\]
+
+---
+
+\subsection{Transformation of Vectors}
+
+Let a vector \( \mathbf{a} = a_i \mathbf{e}_i = a_i' \mathbf{e}_i' \).  
+Then:
+\[
+a_i' = Q_{ij}a_j,
+\quad
+a_i = Q_{ji}a_j'.
+\]
+
+Proof of magnitude invariance:
+\[
+|\mathbf{a}|^2 = a_i a_i = a_i' a_i' = Q_{ij}a_j Q_{ik}a_k \delta_{jk}
+= a_j a_k Q_{ij}Q_{ik} = a_j a_k \delta_{jk} = a_i a_i.
+\]
+Hence, the magnitude is invariant under orthogonal transformations.
+
+---
+
+\subsubsection{Tensor (Dyadic) Product of Two Vectors}
+
+Given vectors \( \mathbf{a} = a_i \mathbf{e}_i \) and \( \mathbf{b} = b_i \mathbf{e}_i \),
+their dyadic (tensor) product is:
+\[
+\mathbf{a}\mathbf{b} = a_i b_j \mathbf{e}_i \mathbf{e}_j.
+\]
+
+This is a second-order tensor whose components transform as:
+\[
+a_i' b_j' = Q_{ik} Q_{jl} a_k b_l.
+\]
+
+Thus:
+\[
+\boxed{A_{ij}' = Q_{ik}Q_{jl}A_{kl}}
+\]
+for a general second-order tensor \(A_{ij}\).
+
+---
+
+\subsubsection{Cartesian Tensors of First Order}
+
+A first-order tensor (vector) is defined by:
+\[
+a_i' = Q_{ij}a_j,
+\quad
+a_i = Q_{ji}a_j'.
+\]
+
+Matrix form:
+\[
+\{a'\} = [Q]\{a\},
+\quad
+\{a\} = [Q]^T\{a'\}.
+\]
+
+---
+
+\subsubsection{Summary}
+
+\begingroup
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l c @{}}
+\toprule
+\textbf{Type} & \textbf{Transformation Law} & \textbf{Tensor Order} \\
+\midrule
+Vector & $\displaystyle a_i' = Q_{ij} a_j$ & 1st order \\[4pt]
+Second-order tensor & $\displaystyle A_{ij}' = Q_{ik} Q_{jl} A_{kl}$ & 2nd order \\[4pt]
+Orthogonality & $\displaystyle Q_{ik} Q_{jk} = \delta_{ij}$ & -- \\[4pt]
+Inverse relation & $\displaystyle Q^{-1} = Q^{T}$ & -- \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup---
+\subsection{Cartesian Tensors and Tensor Algebra}
+
+---
+
+\subsubsection{Second-Order Cartesian Tensors (Matrix Form)}
+
+A second-order tensor is represented by a \(3\times3\) matrix:
+\[
+A'_{ij} = Q_{ip} Q_{jq} A_{pq},
+\quad \text{or} \quad
+[A'] = [Q][A][Q]^T.
+\]
+Conversely:
+\[
+A_{ij} = Q_{pi} Q_{qj} A'_{pq}.
+\]
+
+Hence, the tensor product of two vectors produces a **second-order tensor**.
+
+---
+
+\subsubsection{Zero-Order Tensor (Scalar)}
+
+A scalar is a tensor of order zero — it has the same value in all coordinate systems.  
+Examples: temperature, density, specific energy.
+
+Invariant quantity:
+\[
+a' = a.
+\]
+Something that does not change with coordinate transformation is called an **invariant**.
+
+---
+
+\subsubsection{Trace of a Tensor}
+
+\[
+\text{tr}(A) = A_{ii} = Q_{ip} Q_{iq} A_{pq} = \delta_{pq} A_{pq} = A_{kk}.
+\]
+
+Hence, the trace of a tensor is invariant under coordinate transformations.
+
+---
+
+\subsubsection{Product Between Tensors}
+
+If
+\[
+C_{ij} = A_{ik} B_{kj},
+\]
+and
+\[
+b_i = A_{ij} c_j,
+\]
+then \(b_i\) is a vector and \(C_{ij}\) is a tensor.  
+Hence the product of two tensors (or a tensor and a vector) yields another tensor.
+
+---
+
+\subsubsection{Identity Tensor}
+
+\[
+\mathbf{I} = \delta_{ij} \mathbf{e}_i \mathbf{e}_j =
+\begin{bmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix}.
+\]
+
+\[
+\mathbf{I}\mathbf{a} = \mathbf{a}\mathbf{I} = \mathbf{a}.
+\]
+
+---
+
+\subsubsection{Permutation Tensor of Order 3}
+
+The permutation tensor (Levi–Civita symbol) is a third-order tensor defined as:
+\[
+\varepsilon'_{ijk} = \det[Q] \, Q_{ip} Q_{jq} Q_{kr} \varepsilon_{pqr}.
+\]
+For proper rotations (\(\det[Q]=+1\)):
+\[
+\varepsilon'_{ijk} = Q_{ip} Q_{jq} Q_{kr} \varepsilon_{pqr}.
+\]
+
+---
+
+\subsubsection{Tensor Properties}
+
+\[
+\begin{aligned}
+&\text{i)} \quad I \cdot a = a, \\
+&\text{ii)} \quad I A = A I = A, \\
+&\text{iii)} \quad A(\mathbf{b} \cdot \mathbf{c}) = (A\mathbf{b}) \cdot \mathbf{c}, \\
+&\text{iv)} \quad A(\mathbf{b} \times \mathbf{c}) = (A\mathbf{b}) \times (A\mathbf{c}), \\
+&\text{v)} \quad (a\mathbf{b}) \cdot c = a(\mathbf{b}\cdot c), \\
+&\text{vi)} \quad (a\mathbf{b}) \cdot (\mathbf{c}\mathbf{d}) = (a\cdot \mathbf{c})(\mathbf{b}\cdot \mathbf{d}),\\
+&\text{vii)} \quad (A\mathbf{a})\cdot \mathbf{b} = \mathbf{a}\cdot (A^T\mathbf{b}).
+\end{aligned}
+\]
+
+---
+
+\subsubsection{Tensor Transpose}
+
+\[
+(A^T)_{ij} = A_{ji}.
+\]
+\[
+[A^T] = [A]^T.
+\]
+
+For tensor products:
+\[
+(A\mathbf{b})\cdot \mathbf{c} = \mathbf{b}\cdot (A^T \mathbf{c}).
+\]
+
+Properties:
+\[
+\begin{aligned}
+& (A^T)^T = A, \quad (A+B)^T = A^T + B^T, \\
+& (AB)^T = B^T A^T, \quad (a\mathbf{b})^T = \mathbf{b}a.
+\end{aligned}
+\]
+
+---
+
+\subsubsection{Tensor Inverse}
+
+If \(A^{-1}\) exists:
+\[
+A A^{-1} = A^{-1} A = I.
+\]
+\[
+(A^{-1})^T = (A^T)^{-1}, \quad (AB)^{-1} = B^{-1}A^{-1}.
+\]
+
+---
+
+\subsubsection{Orthogonal Tensors}
+
+A tensor \(R\) is **orthogonal** if:
+\[
+R^T R = R R^T = I.
+\]
+It represents a pure rotation or reflection.
+
+Properties:
+\[
+|R| = 1, \quad R^{-1} = R^T, \quad \text{and} \quad |Ra| = |a|.
+\]
+Proof:
+\[
+|Ra|^2 = (Ra)\cdot (Ra) = a\cdot (R^T R)a = a\cdot a.
+\]
+
+Thus, a rotation tensor preserves vector lengths and angles.
+
+---
+
+\subsubsection{Tensor Symmetric and Antisymmetric Parts}
+
+Any second-order tensor \(A\) can be decomposed as:
+\[
+A = \frac{1}{2}(A + A^T) + \frac{1}{2}(A - A^T),
+\]
+where
+\[
+A^{(s)} = \frac{1}{2}(A + A^T) \quad \text{(symmetric part)},
+\quad
+A^{(a)} = \frac{1}{2}(A - A^T) \quad \text{(antisymmetric part)}.
+\]
+
+---
+
+\subsubsection{Tensor Invariants}
+
+A **tensor invariant** is a quantity that remains unchanged under a coordinate transformation.  
+For a second-order tensor \(A_{ij}\), the three principal invariants are:
+\[
+\begin{aligned}
+I_1 &= \text{tr}(A) = A_{ii},\\
+I_2 &= \tfrac{1}{2}\big[(\text{tr}A)^2 - \text{tr}(A^2)\big],\\
+I_3 &= \det(A).
+\end{aligned}
+\]
+
+---
+
+\subsubsection{Tensor Identity and Orthogonality Example}
+
+If \(R_{ij} = \mathbf{e}_i' \cdot \mathbf{e}_j\), then
+\[
+R_{ij}R_{ik} = \delta_{jk}, \quad R_{ij}R_{kj} = \delta_{ik}.
+\]
+Thus, rotation tensors preserve orthonormality and mutual perpendicularity of base vectors.
+
+---
+\subsubsection{Summary Table}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Concept} & \textbf{Definition} & \textbf{Key Relation} \\
+\midrule
+Tensor transformation & $\displaystyle A'_{ij} = Q_{ip} Q_{jq} A_{pq}$ & $\displaystyle [A'] = [Q][A][Q]^T$ \\[4pt]
+Orthogonality & $\displaystyle Q^T Q = QQ^T = I$ & $\displaystyle Q^{-1} = Q^T$ \\[4pt]
+Identity tensor & $\displaystyle I_{ij} = \delta_{ij}$ & $\displaystyle I a = a$ \\[4pt]
+Symmetric / antisymmetric parts & $\displaystyle A = A^{(s)} + A^{(a)}$ & $\displaystyle A^{(s)} = \tfrac{1}{2}(A + A^T)$ \\[4pt]
+Invariants & $\displaystyle I_1,\, I_2,\, I_3$ & invariant under rotation \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+---
+\subsection{Tensor Invariants, Eigenvalues, and Differential Operators}
+
+---
+
+\subsubsection{First-Order Tensor (Vector)}
+
+Magnitude:
+\[
+a_i a_i = Q_{ij} a_j Q_{ik} a_k = \delta_{jk} a_j a_k = a_j a_j.
+\]
+Hence, the magnitude is invariant under rotation.
+
+---
+
+\subsubsection{Second-Order Tensor (Matrix)}
+
+Trace:
+\[
+\text{tr}(A) = A_{ii}, \quad \text{tr}(A^2) = A_{ij} A_{ji}.
+\]
+
+Proof:
+\[
+(A^2)_{ij} = A_{ik} A_{kj},
+\quad
+(A^3)_{ij} = A_{ik} A_{kl} A_{lj}.
+\]
+
+Hence:
+\[
+\text{tr}(A^n) = A_{i_1 i_2} A_{i_2 i_3} \dots A_{i_n i_1}.
+\]
+
+---
+
+\subsubsection{Third-Order Tensor Contraction}
+
+\[
+T_{ijk} \delta_{jk} = T_{i jj}.
+\]
+
+---
+
+\subsubsection{Tensor Invariants}
+
+For any second-order tensor \(A_{ij}\):
+\[
+\begin{aligned}
+I_1 &= \text{tr}(A) = A_{ii}, \\
+I_2 &= \tfrac{1}{2}[(\text{tr}A)^2 - \text{tr}(A^2)] = \tfrac{1}{2}(A_{ii}A_{jj} - A_{ij}A_{ji}),\\
+I_3 &= \det(A).
+\end{aligned}
+\]
+
+Expanded determinant in index notation:
+\[
+\det[A] = \tfrac{1}{6}\varepsilon_{ijk}\varepsilon_{pqr}A_{ip}A_{jq}A_{kr}.
+\]
+
+---
+
+\subsubsection{Properties of Determinants}
+
+\[
+\begin{aligned}
+&\text{i)} && \det[I] = 1,\\
+&\text{ii)} && \det[A^T] = \det[A],\\
+&\text{iii)} && \det(aA) = a^3 \det[A],\\
+&\text{iv)} && \det[AB] = \det[A]\det[B],\\
+&\text{v)} && \det[A^{-1}] = \dfrac{1}{\det[A]},\\
+&\text{vi)} && \det[Q] = \pm 1 \quad \text{if $Q$ is orthogonal.}
+\end{aligned}
+\]
+
+---
+
+\subsubsection{Adjugate (Adjoint) Tensor}
+
+\[
+A^*_{ij} = \tfrac{1}{2}\varepsilon_{ipq}\varepsilon_{jmn}A_{pm}A_{qn}.
+\]
+
+It satisfies:
+\[
+A A^* = A^* A = (\det A) I.
+\]
+
+Hence:
+\[
+A^{-1} = \dfrac{A^*}{\det A}.
+\]
+
+---
+
+\subsubsection{Eigenvalues and Eigenvectors}
+
+\[
+A n = \lambda n,
+\quad n \cdot n = 1.
+\]
+Here, \(\lambda\) is the eigenvalue and \(n\) the corresponding eigenvector.
+
+The characteristic equation:
+\[
+\det(A - \lambda I) = 0.
+\]
+Expanding gives:
+\[
+-\lambda^3 + I_1 \lambda^2 - I_2 \lambda + I_3 = 0.
+\]
+
+At least one eigenvalue is real.  
+Eigenvalues are invariant under rotation (coordinate-independent).
+
+---
+
+\subsubsection{Cayley–Hamilton Theorem}
+
+Every second-order tensor satisfies its own characteristic equation:
+\[
+A^3 - I_1 A^2 + I_2 A - I_3 I = 0.
+\]
+
+Example:
+\[
+A = 
+\begin{bmatrix}
+5 & 4 & 0\\
+4 & -1 & 0\\
+0 & 0 & 3
+\end{bmatrix}.
+\]
+\[
+\det(A - \lambda I) = -(\lambda - 7)(\lambda - 3)(\lambda + 3) = 0.
+\]
+Thus, \(\lambda_1 = 7,\ \lambda_2 = 3,\ \lambda_3 = -3.\)
+
+---
+
+\subsubsection{Symmetric Tensors}
+
+For symmetric tensors \(A = A^T\):
+\[
+A n = \lambda n.
+\]
+
+Real symmetric tensors have three real (not necessarily distinct) eigenvalues.  
+Eigenvectors associated with distinct eigenvalues are orthogonal.
+
+---
+
+\subsubsection{Orthogonality of Eigenvectors}
+
+Let
+\[
+A n^{(1)} = \lambda_1 n^{(1)}, \quad A n^{(2)} = \lambda_2 n^{(2)}.
+\]
+Then:
+\[
+n^{(1)} \cdot A n^{(2)} = \lambda_2 n^{(1)} \cdot n^{(2)}, \quad
+A n^{(1)} \cdot n^{(2)} = \lambda_1 n^{(1)} \cdot n^{(2)}.
+\]
+Subtracting gives:
+\[
+(\lambda_1 - \lambda_2) n^{(1)} \cdot n^{(2)} = 0.
+\]
+Thus, \(n^{(1)} \perp n^{(2)}\).
+
+---
+
+\subsubsection{Root Multiplicity}
+
+If \(\lambda_1, \lambda_2, \lambda_3\) are distinct, there exist three orthogonal eigenvectors.
+
+If \(\lambda_1 = \lambda_2 \neq \lambda_3\), any vector in the plane normal to \(n^{(3)}\) is an eigenvector with eigenvalue \(\lambda_1\).
+
+If \(\lambda_1 = \lambda_2 = \lambda_3 = \lambda\), then:
+\[
+A = \lambda I,
+\]
+which defines an **isotropic tensor**.
+
+---
+
+\subsubsection{Principal Axes Theorem}
+
+A real symmetric tensor can be diagonalized by a rotation:
+\[
+[A] = 
+\begin{bmatrix}
+\lambda_1 & 0 & 0\\
+0 & \lambda_2 & 0\\
+0 & 0 & \lambda_3
+\end{bmatrix}.
+\]
+Hence, symmetric tensors can always be rotated into a coordinate system where they are diagonal.
+
+Spectral representation:
+\[
+A = \lambda_1 n^{(1)} n^{(1)} + \lambda_2 n^{(2)} n^{(2)} + \lambda_3 n^{(3)} n^{(3)}.
+\]
+
+---
+
+\subsubsection{Gradient of a Scalar Field}
+
+For a scalar function \(\phi(x_1, x_2, x_3)\):
+\[
+d\phi = \frac{\partial \phi}{\partial x_i} dx_i = \nabla \phi \cdot d\mathbf{x}.
+\]
+Thus:
+\[
+\nabla \phi = \frac{\partial \phi}{\partial x_i} \mathbf{e}_i.
+\]
+
+---
+
+\subsubsection{Directional Derivative}
+
+If \(\mathbf{e}\) is a unit vector:
+\[
+\frac{d\phi}{ds} = \nabla \phi \cdot \mathbf{e}.
+\]
+The gradient of a scalar gives the direction of **maximum rate of increase** of \(\phi\).
+
+---
+
+\subsubsection{Gradient of a Vector Field}
+
+For a vector field \(\mathbf{a} = a_i \mathbf{e}_i\):
+\[
+\nabla \mathbf{a} = \frac{\partial a_i}{\partial x_j} \mathbf{e}_i \mathbf{e}_j.
+\]
+
+---
+
+\subsection{Summary Table of Tensor Properties}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Concept} & \textbf{Definition} & \textbf{Example Expression} \\
+\midrule
+First invariant & $\displaystyle I_1 = \text{tr}(A)$ & $\displaystyle A_{ii}$ \\[4pt]
+Second invariant & $\displaystyle I_2 = \tfrac{1}{2}\big[(\text{tr}A)^2 - \text{tr}(A^2)\big]$ & \\[4pt]
+Third invariant & $\displaystyle I_3 = \det(A)$ & $\displaystyle \tfrac{1}{6}\varepsilon_{ijk}\varepsilon_{pqr}A_{ip}A_{jq}A_{kr}$ \\[4pt]
+Spectral decomposition & $\displaystyle A = \sum_i \lambda_i n^{(i)} n^{(i)}$ & principal directions \\[4pt]
+Isotropic tensor & $\displaystyle A = \lambda I$ & identical eigenvalues \\[4pt]
+Gradient & $\displaystyle \nabla \phi = \partial_i \phi\, e_i$ & rate of change of scalar \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\section{Motion of a Continuum}
+
+Suppose a body $B$ is composed of a set of particles, and at each instant of time each particle of the set is assigned a unique point of a closed region $R$ of the 3D Euclidean space, such that each point of $R$ is occupied by just one particle.  
+We call $R$ the \textit{configuration of body $B$ at time $t$}.
+
+\vspace{8pt}
+
+We label the particles by a position vector $\underline{X} = (X_1, X_2, X_3)$ referred to the fixed Cartesian axes.
+
+% \begin{center}
+% \begin{tikzpicture}[scale=1.2]
+%   % reference config
+%   \draw[thick] (-3,0) ellipse (1.2 and 0.7);
+%   \node at (-3.3,0.9) {$B_0$};
+%   \node at (-3.8,-0.6) {$t=0$};
+%   \draw[->, thick] (-3,0) -- (-1.8,0.3) node[midway, above] {$\underline{X}$};
+%   \filldraw (-1.8,0.3) circle (1.5pt) node[above right] {$P_0$};
+
+%   % current config
+%   \draw[thick] (2,0.1) ellipse (1.2 and 0.7);
+%   \node at (2.3,0.9) {$B_t$};
+%   \node at (2.9,-0.6) {$t>0$};
+%   \draw[->, thick] (2,0.1) -- (3.1,0.4) node[midway, above] {$\underline{x}$};
+%   \filldraw (3.1,0.4) circle (1.5pt) node[above right] {$P$};
+
+%   % mapping arrow
+%   \draw[->, thick, blue!60!black] (-1.8,0.3) .. controls (0.2,1.0) .. (3.1,0.4);
+%   \node[above, blue!60!black] at (0.6,1.1) {$\underline{x} = \underline{\chi}(\underline{X}, t)$};
+%   \draw[->] (-4.5,-1) -- (4,-1) node[right] {$O$};
+% \end{tikzpicture}
+% \end{center}
+
+The material which occupies the region $B_0$ at $t=0$ moves and occupies a new region $B_t$ at time $t$.  
+The motion of the body can be described by specifying the dependence of the position $\underline{x}$ of all particles of the body at time $t$ on the position $\underline{X}$ at time $t=0$:
+\begin{align}
+\underline{x} = \underline{\chi}(\underline{X}, t)
+\end{align}
+
+Coordinates $\underline{X}$ label the particles $\Rightarrow$ \textbf{material coordinates}.  
+Coordinates $\underline{x}$ identify points in space which, in general, are occupied by different particles at different times $\Rightarrow$ \textbf{spatial coordinates}.
+
+\vspace{8pt}
+\noindent
+Configuration of body:
+\begin{itemize}
+  \item at $t = 0$: \textit{reference configuration}
+  \item at $t = t$: \textit{current configuration}
+\end{itemize}
+
+\subsection{Material and Spatial Descriptions}
+
+\textbf{Material description (Lagrangian description):}
+\begin{align}
+\rho(\underline{X}, t) &: \text{density} \\[6pt]
+\underline{v}(\underline{X}, t) &: \text{velocity of particles at time } t, 
+\text{ defined by their material coordinate } \underline{X} \text{ at } t=0
+\end{align}
+
+\textbf{Spatial description (Eulerian description):}
+\begin{align}
+\rho(\underline{x}, t) &: \text{density} \\[6pt]
+\underline{v}(\underline{x}, t) &: \text{velocity of the particle which, at time } t, 
+\text{ occupies the position } \underline{x}
+\end{align}
+
+\vspace{8pt}
+The mapping $\underline{x} = \underline{\chi}(\underline{X}, t)$ 
+has a unique inverse $\underline{X} = \underline{\chi}^{-1}(\underline{x}, t)$,
+since only one particle can occupy one place at one time.
+
+\vspace{10pt}
+\textit{Remark:}  
+The spatial (Eulerian) description does not provide direct information 
+regarding changes in particle properties as they move about.
+
+\subsection{Displacement and Velocity}
+
+\textbf{Displacement:}
+\begin{align}
+\underline{u} = \underline{x} - \underline{X}
+\end{align}
+
+In the \textbf{material (Lagrangian) description}:
+\begin{align}
+\underline{u}(\underline{X}, t) = \underline{\chi}(\underline{X}, t) - \underline{X}
+\end{align}
+
+In the \textbf{spatial (Eulerian) description}:
+\begin{align}
+\underline{u}(\underline{x}, t) = \underline{x} - \underline{\chi}^{-1}(\underline{x}, t)
+\end{align}
+
+\vspace{6pt}
+The \textbf{velocity} $\underline{v}$ of a particle is the rate of change of its displacement:
+\begin{align}
+\underline{v}(\underline{X}, t) 
+= \frac{\partial \underline{u}(\underline{X}, t)}{\partial t}
+= \frac{\partial \underline{\chi}(\underline{X}, t)}{\partial t}
+\bigg|_{\underline{X}}
+\end{align}
+
+\subsection{Material Derivative}
+
+The time rate of change of a quantity (such as temperature, density, or velocity) 
+of a material particle is known as the \textbf{material derivative}.
+
+\vspace{6pt}
+\textbf{In material coordinates (Lagrangian):}
+\begin{align}
+\phi = \phi(\underline{X}, t)
+\quad \Rightarrow \quad
+\frac{d\phi}{dt} = \dot{\phi}
+\end{align}
+
+\textbf{In spatial coordinates (Eulerian):}
+\begin{align}
+\phi = \phi(\underline{x}, t)
+\end{align}
+
+Applying the chain rule:
+\begin{align}
+\frac{d\phi}{dt} 
+&= \frac{\partial \phi}{\partial t}
+ + \frac{\partial \phi}{\partial x_1}\frac{dx_1}{dt}
+ + \frac{\partial \phi}{\partial x_2}\frac{dx_2}{dt}
+ + \frac{\partial \phi}{\partial x_3}\frac{dx_3}{dt} \\[6pt]
+&= \frac{\partial \phi}{\partial t}
+ + \frac{\partial \phi}{\partial x_i}\frac{dx_i}{dt}
+\qquad \text{(Einstein summation)} \\[6pt]
+&= \frac{\partial \phi}{\partial t} 
+ + (\nabla \phi) \cdot \underline{v}
+\end{align}
+
+\textbf{Therefore:}
+\begin{align}
+\frac{d\phi}{dt} 
+= \left( \frac{\partial \phi}{\partial t} \right)_{\underline{x}}
++ \nabla \phi \cdot \underline{v}
+\end{align}
+
+For any vector field $\underline{u} = \underline{u}(\underline{x}, t)$:
+\begin{align}
+\frac{d\underline{u}}{dt}
+&= \frac{\partial \underline{u}}{\partial t}
+ + (\underline{v} \cdot \nabla)\underline{u} \\[4pt]
+\Rightarrow 
+\left(\frac{du_i}{dt}\right)
+&= \frac{\partial u_i}{\partial t}
+ + v_j \frac{\partial u_i}{\partial x_j}
+\end{align}
+
+\begin{example} 
+A body undergoes a motion defined by
+\begin{align}
+x_1 &= \frac{X_1}{1 + a^2 t^2}, \qquad
+x_2 = X_2, \qquad
+x_3 = X_3
+\end{align}
+where $a$ is a constant.
+
+Find the displacement and velocity fields.
+
+\vspace{4pt}
+\textbf{In material description:}
+\begin{align}
+u_1 &= x_1 - X_1 = X_1\!\left(\frac{1}{1 + a^2 t^2} - 1\right)
+= -\frac{a^2 t^2 X_1}{1 + a^2 t^2} \\[4pt]
+u_2 &= 0, \qquad u_3 = 0
+\end{align}
+
+\textbf{Velocity (material form):}
+\begin{align}
+v_1 &= \frac{\partial u_1}{\partial t}\bigg|_{\underline{X}}
+= \frac{-2a^2 t X_1}{(1 + a^2 t^2)^2} \\[4pt]
+v_2 &= 0, \qquad v_3 = 0
+\end{align}
+
+\vspace{6pt}
+\textbf{In spatial description:}
+Using $X_1 = x_1(1 + a^2 t^2)$,
+\begin{align}
+u_1(x_1, t) &= -a^2 t^2 x_1, \qquad 
+u_2 = 0, \quad u_3 = 0
+\end{align}
+
+\textbf{Velocity (Eulerian form):}
+\begin{align}
+v_1 
+&= \frac{\partial u_1}{\partial t}\bigg|_{\underline{x}}
++ \frac{\partial u_1}{\partial x_j}\bigg|_t v_j \\[4pt]
+&= \frac{\partial (-a^2 t^2 x_1)}{\partial t} 
++ \frac{\partial (-a^2 t^2 x_1)}{\partial x_1} v_1 \\[6pt]
+&= -2a^2 t x_1 - a^2 t^2 v_1 \\[4pt]
+\Rightarrow \quad v_1 
+&= \frac{-2a^2 t x_1}{1 + a^2 t^2}, 
+\qquad v_2 = v_3 = 0
+\end{align}
+\end{example}
+\subsection{Deformation Analysis}
+
+\subsubsection{(i) At any time $t$}
+
+An infinitesimal element $d\underline{X}$ in the reference configuration becomes
+$d\underline{x}$ in the current configuration at time $t$.
+
+\begin{align}
+\underline{x} = \underline{\chi}(\underline{X}, t)
+\end{align}
+
+Taking the differential:
+\begin{align}
+d\underline{x} 
+= \frac{\partial \underline{x}}{\partial \underline{X}} \, d\underline{X}
+\end{align}
+
+We write
+\begin{align}
+d\underline{x} = \underline{F} \, d\underline{X}
+\end{align}
+where
+\begin{align}
+F_{ij} = \frac{\partial x_i}{\partial X_j},
+\qquad 
+\underline{F} = \frac{\partial \underline{x}}{\partial \underline{X}}
+\end{align}
+
+\noindent
+$\underline{F}$ is called the \textbf{deformation gradient}.
+\begin{align}
+\underline{F} =
+\begin{bmatrix}
+\frac{\partial x_1}{\partial X_1} & \frac{\partial x_1}{\partial X_2} & \frac{\partial x_1}{\partial X_3} \\[4pt]
+\frac{\partial x_2}{\partial X_1} & \frac{\partial x_2}{\partial X_2} & \frac{\partial x_2}{\partial X_3} \\[4pt]
+\frac{\partial x_3}{\partial X_1} & \frac{\partial x_3}{\partial X_2} & \frac{\partial x_3}{\partial X_3}
+\end{bmatrix}
+\end{align}
+
+To define strains, we compare $d\underline{x}$ with $d\underline{X}$.
+Although $\underline{F}$ is a fundamental tensor in deformation analysis,
+it is not a suitable measure of deformation since it also contains the rigid-body motion.
+
+---
+
+\subsubsection{(ii) Following a material particle ($\underline{X} = \text{const}$)}
+
+At a point $\underline{X}$:
+\begin{align}
+d\underline{x} 
+= \frac{\partial \underline{x}(\underline{X}, t)}{\partial t}\,dt 
+= \underline{v}\,dt
+\end{align}
+
+We can also write
+\begin{align}
+d\underline{X} = \underline{F}^{-1} \, d\underline{x}
+\end{align}
+
+Define $J$ as the determinant of $\underline{F}$:
+\begin{align}
+J = \det[\underline{F}]
+\end{align}
+
+\noindent
+$J$ is the \textbf{Jacobian} of the deformation.
+
+\vspace{4pt}
+Notice $J \neq 0$ ensures a local inverse exists and $J = 1$ at $t = 0$.
+During motion $J > 0$.
+
+By mass conservation,
+\begin{align}
+\rho J = \rho_0
+\end{align}
+where $\rho_0$ is the reference density and $\rho$ is the current density.
+
+---
+
+\subsubsection{Change in length}
+
+At any point,
+\begin{align}
+ds_0 = \| d\underline{X} \|,
+\qquad
+ds = \| d\underline{x} \|
+\end{align}
+
+Let $\lambda = ds/ds_0$ be the \textbf{stretch ratio}.
+Then,
+\begin{align}
+ds^2 = d\underline{x} \cdot d\underline{x}
+= ( \underline{F} \, d\underline{X} ) \cdot ( \underline{F} \, d\underline{X} )
+= d\underline{X} \cdot (\underline{F}^T \underline{F}) \, d\underline{X}
+\end{align}
+
+Define
+\begin{align}
+\underline{C} = \underline{F}^T \underline{F}
+\end{align}
+\noindent
+$\underline{C}$ is the \textbf{Right Cauchy--Green deformation tensor.}
+
+---
+
+\noindent
+\textbf{Properties of $\underline{C}$:}
+\begin{itemize}
+  \item $\underline{C}$ is symmetric: $\underline{C} = \underline{C}^T$.
+  \item $\underline{C}$ is positive definite because $ds^2 > 0$
+  for all nonzero $d\underline{X}$.
+  \item It maps a finite-length vector into another finite-length vector.
+\end{itemize}
+
+\noindent
+If $\underline{a}$ is an arbitrary vector, then
+\begin{align}
+\underline{a} \cdot (\underline{C}\underline{a}) 
+= (\underline{F}\underline{a}) \cdot (\underline{F}\underline{a}) > 0
+\end{align}
+so $\underline{C}$ is \textbf{positive definite.}
+
+A tensor $\underline{A}$ is positive definite if 
+$\underline{a} \cdot (\underline{A}\underline{a}) > 0$ 
+for all nonzero $\underline{a}$.
+
+---
+
+\subsubsection{Configuration comparison and mapping}
+
+\begin{itemize}
+  \item $\underline{x} = \underline{\chi}(\underline{X}, t)$ represents the motion.
+  \item For any fixed $t$, $\underline{x} = \underline{\chi}(\underline{X})$ 
+  defines a deformation from the reference configuration.
+  \item $\underline{F} = \partial \underline{x} / \partial \underline{X}$ is nonsingular 
+  if $\det(\underline{F}) \neq 0$, ensuring the mapping is one-to-one.
+\end{itemize}
+
+We have
+\begin{align}
+d\underline{x} = \underline{F} \, d\underline{X}, 
+\qquad
+\underline{F}^T \underline{F} = \underline{C}
+\end{align}
+
+\noindent
+Because $\underline{F}^T \underline{F}$ is symmetric and positive definite, 
+$\underline{C}$ serves as a proper measure of deformation independent of rigid-body motion.
+
+\[
+\underline{F}^T \underline{F} = \text{positive definite}, 
+\qquad
+\underline{C} = \underline{F}^T \underline{F}
+\]
+
+\subsection{Rotation Tensor}
+
+Every rotation tensor $\underline{R}$ has an eigenvalue of $1$.
+
+\begin{proof}
+\begin{align}
+\underline{R} \underline{R}^T &= \underline{I}, 
+\qquad \det(\underline{R}) = +1
+\end{align}
+
+Then,
+\begin{align}
+\underline{R}^T \underline{R} &= \underline{I} \\[6pt]
+(\underline{R}^T - \underline{I})(\underline{R} - \underline{I})
+&= \underline{R}^T \underline{R} - \underline{R}^T - \underline{R} + \underline{I} \\[6pt]
+&= \underline{I} - \underline{R}^T - \underline{R} + \underline{I} \\[6pt]
+&= 2\underline{I} - (\underline{R} + \underline{R}^T)
+\end{align}
+
+Taking determinants on both sides (for a $3 \times 3$ matrix):
+\begin{align}
+\det[(\underline{R} - \underline{I})(\underline{R}^T - \underline{I})]
+&= \det(\underline{R} - \underline{I}) \det(\underline{R}^T - \underline{I}) \\[4pt]
+&= \det(\underline{R} - \underline{I}) \det(\underline{R} - \underline{I})^T \\[4pt]
+&= [\det(\underline{R} - \underline{I})]^2
+\end{align}
+
+Since $\det(\underline{R}) = +1$,
+\begin{align}
+\det(\underline{I} - \underline{R}) 
+&= -\det(\underline{R} - \underline{I})
+\end{align}
+
+Thus,
+\begin{align}
+\det(\underline{R} - \underline{I}) = 0
+\end{align}
+
+Hence, $\lambda = 1$ is one of the eigenvalues of $\underline{R}$.
+
+If the corresponding eigenvector associated with $\lambda = 1$ is $\underline{n}$, then
+\begin{align}
+\underline{R}\,\underline{n} = \underline{n}
+\end{align}
+which represents the \textbf{axis of rotation}.
+\end{proof}
+
+\subsubsection{Rotation Tensor — Orthogonal Matrix Form}
+
+Let $\underline{R}$ be an orthogonal matrix such that
+\begin{align}
+\underline{R}\underline{R}^T = \underline{I}
+\end{align}
+
+Example in two dimensions:
+\begin{align}
+\underline{R} =
+\begin{bmatrix}
+\cos\theta & -\sin\theta \\[4pt]
+\sin\theta & \cos\theta
+\end{bmatrix}
+\end{align}
+
+\begin{proof}
+\begin{align}
+\underline{R}\underline{R}^T &= \underline{I} \\[6pt]
+\Rightarrow \;
+(\underline{R} - \underline{I})(\underline{R}^T - \underline{I})
+&= -(\underline{R} - \underline{I})^T \\[6pt]
+\det[(\underline{R} - \underline{I})(\underline{R}^T - \underline{I})]
+&= (-1)^n \det[\underline{R} - \underline{I}]
+\end{align}
+
+Hence,
+\begin{align}
+\det[\underline{R} - \underline{I}] \, \det[\underline{R}^T - \underline{I}]
+= (-1)^n \det[\underline{R} - \underline{I}]
+\end{align}
+
+For a matrix of dimension $n$:
+\begin{itemize}
+  \item If $n$ is \textbf{odd}: $(-1)^n = -1$,  
+        then $\det[\underline{R} - \underline{I}] = 0$.
+  \item If $n$ is \textbf{even}: $(-1)^n = +1$,  
+        then $\det[\underline{R} - \underline{I}] = \det[\underline{R}^T - \underline{I}]$,  
+        and we \textit{cannot conclude} that $\det[\underline{R} - \underline{I}] = 0$.
+\end{itemize}
+
+Therefore, in odd-dimensional space (e.g.\ $n=3$),  
+every rotation tensor $\underline{R}$ necessarily has an eigenvalue of $1$.
+\end{proof}
+
+\subsubsection{Rotation Tensor: Axis of Rotation and Matrix Form}
+
+Let $\underline{n}$ be the unit eigenvector of a rotation tensor $\underline{R}$ 
+associated with the eigenvalue $\lambda = 1$, that is:
+\begin{align}
+\underline{R}\underline{n} = \underline{n}
+\end{align}
+
+---
+
+\textbf{Constructing the orthonormal basis:}
+
+Consider an arbitrary orthonormal basis 
+$\{\underline{e}_1, \underline{e}_2, \underline{e}_3\}$ with $\underline{e}_3 = \underline{n}$.
+Then there exists an angle $\theta$ such that
+\begin{align}
+\underline{R}\underline{e}_1 &= \cos\theta\,\underline{e}_1 
++ \sin\theta\,\underline{e}_2 \\[4pt]
+\underline{R}\underline{e}_2 &= -\sin\theta\,\underline{e}_1 
++ \cos\theta\,\underline{e}_2 \\[4pt]
+\underline{R}\underline{e}_3 &= \underline{e}_3
+\end{align}
+
+Hence, the rotated basis vectors are:
+\begin{align}
+\underline{e}_1' = \cos\theta\,\underline{e}_1 + \sin\theta\,\underline{e}_2,
+\qquad
+\underline{e}_2' = -\sin\theta\,\underline{e}_1 + \cos\theta\,\underline{e}_2,
+\qquad
+\underline{e}_3' = \underline{e}_3
+\end{align}
+
+---
+
+\textbf{Derivation:}
+
+Given $\underline{n}$, we choose $\underline{e}_1 \perp \underline{n}$ 
+and define $\underline{e}_2 = \underline{n} \times \underline{e}_1$.
+This defines a second orthonormal basis $\{\underline{e}_1, \underline{e}_2, \underline{n}\}$.
+
+Because $\underline{R}$ leaves $\underline{n}$ invariant, it rotates 
+$\underline{e}_1$ and $\underline{e}_2$ in the plane orthogonal to $\underline{n}$ 
+by an angle $\theta$.  
+Thus, the rotation matrix relative to this basis is:
+\begin{align}
+[\underline{R}] =
+\begin{bmatrix}
+\cos\theta & -\sin\theta & 0 \\[4pt]
+\sin\theta & \cos\theta  & 0 \\[4pt]
+0          & 0           & 1
+\end{bmatrix}
+\end{align}
+
+---
+
+\textbf{Component relations:}
+\begin{align}
+R_{11} &= \cos\theta, 
+& R_{12} &= -\sin\theta, 
+& R_{13} &= 0, \\[4pt]
+R_{21} &= \sin\theta, 
+& R_{22} &= \cos\theta, 
+& R_{23} &= 0, \\[4pt]
+R_{31} &= 0, 
+& R_{32} &= 0, 
+& R_{33} &= 1
+\end{align}
+
+---
+
+\textbf{Tensor form:}
+\begin{align}
+\underline{R}
+&= \cos\theta\,(\underline{e}_1 \underline{e}_1 
++ \underline{e}_2 \underline{e}_2)
++ \sin\theta\,(\underline{e}_2 \underline{e}_1 
+- \underline{e}_1 \underline{e}_2)
++ \underline{e}_3 \underline{e}_3
+\end{align}
+
+\textbf{Trace relation:}
+\begin{align}
+\operatorname{tr}[\underline{R}] = 2\cos\theta + 1
+\end{align}
+
+Thus, the rotation tensor about $\underline{n}$ 
+rotates vectors in the plane orthogonal to $\underline{n}$ by angle $\theta$ 
+and leaves $\underline{n}$ invariant.
+
+\subsubsection{Geometric Interpretation of the Rotation Tensor}
+
+The unit eigenvector $\underline{n}$ of the rotation tensor $\underline{R}$ 
+defines the \textbf{axis of rotation}, and the angle $\theta$ defines the 
+\textbf{angle of rotation} of the tensor $\underline{R}$.
+
+In other words, when $\underline{R}$ operates on a vector $\underline{a}$, 
+the resulting vector $\underline{R}\underline{a}$ is obtained by rotating 
+$\underline{a}$ about $\underline{n}$ through an angle $\theta$.
+
+---
+
+\begin{proof}
+Consider the same orthonormal basis 
+$\{\underline{e}_1, \underline{e}_2, \underline{e}_3\}$ 
+as before, with $\underline{e}_3 = \underline{n}$.
+
+Let $\underline{a}$ have components 
+$a_i$ with respect to $\underline{e}_i$:
+\begin{align}
+\underline{a} = a_i \underline{e}_i
+\end{align}
+
+Then,
+\begin{align}
+\underline{R}\underline{a} 
+= a_i\,\underline{R}\underline{e}_i 
+= a_i\,\underline{e}_i'
+\end{align}
+where $\underline{e}_i'$ are the rotated basis vectors given by
+\begin{align}
+\underline{e}_1' &= \cos\theta\,\underline{e}_1 + \sin\theta\,\underline{e}_2, \\[4pt]
+\underline{e}_2' &= -\sin\theta\,\underline{e}_1 + \cos\theta\,\underline{e}_2, \\[4pt]
+\underline{e}_3' &= \underline{e}_3
+\end{align}
+
+Thus, the components of $\underline{R}\underline{a}$ 
+with respect to $\{\underline{e}_i'\}$ are the same as the components of $\underline{a}$ 
+with respect to $\{\underline{e}_i\}$.
+
+Since $\underline{e}_1$ and $\underline{e}_2$ result from rotating 
+$\underline{e}_1'$ and $\underline{e}_2'$ by $\theta$ about $\underline{n}$, 
+we conclude that the action of $\underline{R}$ on $\underline{a}$ 
+rotates $\underline{a}$ by the angle $\theta$ about $\underline{n}$.
+\end{proof}
+
+\subsubsection{Rigid Body Motion}
+
+\textbf{Rigid Body Translation:}
+\begin{align}
+\underline{x} = \underline{X} + \underline{c}(t),
+\qquad \text{where } \underline{c}(0) = \underline{0}
+\end{align}
+
+\textbf{Rigid Body Rotation:}
+\begin{align}
+\underline{x} = \underline{R}\underline{X}
+\end{align}
+
+\textbf{General Rigid Body Motion (RBM):}
+\begin{align}
+\underline{x} = \underline{R}\underline{X} + \underline{c}(t)
+\end{align}
+
+This represents a combination of rotation and translation.
+
+---
+
+\textbf{Property:}  
+For a rigid body motion, the distances between any two material points remain constant:
+\begin{align}
+\underline{x}_1 &= \underline{R}\underline{X}_1 + \underline{c} \\[4pt]
+\underline{x}_2 &= \underline{R}\underline{X}_2 + \underline{c} \\[4pt]
+\Rightarrow \quad 
+\|\underline{x}_1 - \underline{x}_2\|
+&= \|\underline{R}(\underline{X}_1 - \underline{X}_2)\|
+= \|\underline{X}_1 - \underline{X}_2\|
+\end{align}
+
+Hence, rigid body motion preserves lengths and angles.
+
+---
+
+\begin{proof}
+For $\underline{x} = \underline{R}\underline{X} + \underline{c}$,
+\begin{align}
+F_{ij} 
+&= \frac{\partial x_i}{\partial X_j}
+= \frac{\partial (R_{ik} X_k + c_i)}{\partial X_j}
+= R_{ik} \frac{\partial X_k}{\partial X_j} \\[4pt]
+&= R_{ik} \delta_{kj}
+= R_{ij}
+\end{align}
+
+Thus, the deformation gradient for a rigid body motion is:
+\begin{align}
+\underline{F} = \underline{R}
+\end{align}
+
+Since $\underline{R}$ is an orthogonal tensor,
+\begin{align}
+\underline{F}^T \underline{F} = \underline{I}
+\end{align}
+
+which confirms that rigid body motion produces no strain or deformation.
+\end{proof}
+
+\subsection{Principal Stretches and Directions}
+
+Since we require $\det(\underline{F}) > 0$, we conclude that $\det(\underline{C}) > 0$, 
+which is indeed the case because $\underline{F}$ is proper orthogonal for a rigid body motion.
+
+Also, since $\underline{F} = \underline{R}$,
+\begin{align}
+\underline{C} = \underline{F}^T \underline{F}
+= \underline{R}^T \underline{R}
+= \underline{I}
+\end{align}
+
+Thus, for a rigid motion, $\underline{C}$ is constant and equals $\underline{I}$, 
+confirming that $\underline{C}$ is a suitable measure of deformation.
+
+---
+
+\textbf{Stretch Ratio:}
+
+Consider a material line element $d\underline{X}$ in the reference configuration 
+and $d\underline{x}$ in the current configuration.
+
+\[
+d\underline{x} = \underline{F} d\underline{X}
+\]
+
+Let 
+\[
+ds_0 = \|d\underline{X}\|, \qquad ds = \|d\underline{x}\|
+\]
+and define the stretch ratio as
+\[
+\lambda = \frac{ds}{ds_0}
+\]
+
+Since $ds^2 = d\underline{x}\cdot d\underline{x}$,
+\begin{align}
+ds^2 &= d\underline{X}\cdot \underline{C}\, d\underline{X}
+\end{align}
+
+Let $\underline{N}$ be the unit vector along $d\underline{X}$:
+\[
+d\underline{X} = ds_0\,\underline{N}
+\]
+Then
+\begin{align}
+\lambda^2 = \underline{N}\cdot \underline{C}\, \underline{N}
+\end{align}
+
+---
+
+\textbf{Principal Stretches and Directions:}
+
+To find stationary values of $\lambda^2$, 
+maximize or minimize $\underline{N}\cdot\underline{C}\,\underline{N}$ 
+under the constraint $\underline{N}\cdot\underline{N} = 1$.
+
+Using Lagrange multipliers:
+\begin{align}
+\underline{C}\underline{N} - \lambda^2 \underline{N} = \underline{0}
+\end{align}
+
+Hence, the eigenvalues of $\underline{C}$ are $\lambda_1^2, \lambda_2^2, \lambda_3^2$,
+and the corresponding eigenvectors $\underline{N}^{(1)}, \underline{N}^{(2)}, \underline{N}^{(3)}$
+are the \textbf{principal directions of stretch}.
+
+The stationary values of $\lambda^2$ are the eigenvalues of $\underline{C}$, and
+\[
+\lambda_i = \sqrt{\text{eigenvalue of }\underline{C}}
+\]
+
+The directions $\underline{N}^{(i)}$ define the \textbf{principal directions}.
+
+The minimum of $\underline{N}\cdot\underline{C}\,\underline{N}$ 
+equals the smallest eigenvalue of $\underline{C}$, 
+and the maximum equals the largest eigenvalue.
+
+---
+
+\textbf{Orthogonality:}
+
+If $\underline{C}$ is symmetric, then its eigenvectors are orthogonal:
+\begin{align}
+\underline{N}^{(i)} \cdot \underline{N}^{(j)} = 0, 
+\quad i \ne j
+\end{align}
+
+Proof:
+\begin{align}
+\underline{C}\underline{N}^{(i)} &= \lambda_i^2 \underline{N}^{(i)} \\[4pt]
+\underline{C}\underline{N}^{(j)} &= \lambda_j^2 \underline{N}^{(j)}
+\end{align}
+Taking the dot product of the first with $\underline{N}^{(j)}$ 
+and the second with $\underline{N}^{(i)}$, we obtain
+\begin{align}
+(\lambda_i^2 - \lambda_j^2)(\underline{N}^{(i)} \cdot \underline{N}^{(j)}) = 0
+\end{align}
+so $\underline{N}^{(i)}$ and $\underline{N}^{(j)}$ are orthogonal if $\lambda_i \ne \lambda_j$.
+
+---
+
+\textbf{Relation between stretches and $\underline{C}$:}
+\begin{align}
+\lambda_i^2 = \underline{N}^{(i)} \cdot \underline{C}\, \underline{N}^{(i)}
+\end{align}
+
+If $\underline{N} = \underline{e}_i$ (aligned with a principal direction):
+\[
+\lambda_i = \sqrt{C_{ii}}
+\]
+
+If $\underline{N}^{(i)}$ and $\underline{N}^{(j)}$ are distinct,
+the angle between them satisfies
+\begin{align}
+\cos\alpha_{ij} 
+= \frac{\underline{N}^{(i)}\cdot \underline{C}\,\underline{N}^{(j)}}
+{\lambda_i \lambda_j}
+= \frac{C_{ij}}{\sqrt{C_{ii} C_{jj}}}
+\end{align}
+
+\subsubsection{Square Root Theorem}
+
+Let $\underline{C}$ be a symmetric and positive definite tensor.  
+Then there exists a unique symmetric, positive definite tensor $\underline{U}$ such that
+\begin{align}
+\underline{U}^2 = \underline{C}
+\end{align}
+We write this as
+\[
+\underline{C} = \underline{U}^2
+\quad \text{or} \quad
+\underline{U} = \sqrt{\underline{C}}
+\]
+
+---
+
+\textbf{Spectral Representation:}
+
+If 
+\[
+\underline{C} = \sum_{i=1}^{3} \lambda_i \, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\]
+where $\lambda_i$ and $\underline{N}^{(i)}$ are the eigenvalues and eigenvectors of $\underline{C}$,  
+then
+\[
+\underline{U} = \sum_{i=1}^{3} \sqrt{\lambda_i} \, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\]
+
+Thus, $\underline{U}$ shares the same principal directions as $\underline{C}$, 
+and its eigenvalues are $\sqrt{\lambda_i}$.
+
+---
+
+\textbf{Matrix Example:}
+
+\[
+\underline{C} =
+\begin{bmatrix}
+\lambda_1 & 0 \\[4pt]
+0 & \lambda_2
+\end{bmatrix},
+\qquad
+\underline{U} =
+\begin{bmatrix}
+\sqrt{\lambda_1} & 0 \\[4pt]
+0 & \sqrt{\lambda_2}
+\end{bmatrix}
+\]
+\subsubsection{Polar Decomposition Theorem}
+
+Let $\underline{F}$ be an invertible tensor (i.e.\ $\det \underline{F} > 0$).  
+Then there exist unique positive definite, symmetric tensors 
+$\underline{U}$ and $\underline{V}$, and a rotation tensor $\underline{R}$ such that:
+\begin{align}
+\underline{F} = \underline{R}\underline{U} = \underline{V}\underline{R}
+\end{align}
+
+Each of these decompositions is unique.
+
+\begin{itemize}
+    \item $\underline{F} = \underline{R}\underline{U}$ is the \textbf{right polar decomposition} of $\underline{F}$
+    \item $\underline{F} = \underline{V}\underline{R}$ is the \textbf{left polar decomposition} of $\underline{F}$
+\end{itemize}
+
+Here:
+\[
+\underline{R} \text{ is a rotation tensor (orthogonal, } \underline{R}^T\underline{R} = \underline{I},\ \det \underline{R} > 0)
+\]
+\[
+\underline{U} \text{ is the right stretch tensor,} 
+\qquad \underline{V} \text{ is the left stretch tensor.}
+\]
+
+---
+
+\textbf{Relationships between the tensors:}
+\begin{align}
+\underline{C} &= \underline{F}^T \underline{F} = \underline{U}^2 \\[4pt]
+\underline{B} &= \underline{F}\underline{F}^T = \underline{V}^2
+\end{align}
+
+Thus,
+\begin{align}
+\underline{U} = \sqrt{\underline{C}},
+\qquad
+\underline{V} = \sqrt{\underline{B}}
+\end{align}
+
+---
+
+\begin{proof}
+Let $\lambda_i > 0$ be the eigenvalues of $\underline{C}$ and 
+$\underline{N}^{(i)}$ the corresponding eigenvectors.  
+Since $\underline{C}$ is symmetric and positive definite,
+\[
+\underline{C} = \sum_{i=1}^3 \lambda_i\, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\]
+Define
+\[
+\underline{U} = \sum_{i=1}^3 \sqrt{\lambda_i}\, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\]
+so that $\underline{U}$ is symmetric and positive definite.
+
+Now define
+\[
+\underline{R} = \underline{F}\underline{U}^{-1}
+\]
+
+Then,
+\begin{align}
+\underline{R}^T\underline{R}
+&= (\underline{U}^{-1})^T \underline{F}^T \underline{F} \underline{U}^{-1} \\[4pt]
+&= \underline{U}^{-1} \underline{C} \underline{U}^{-1} \\[4pt]
+&= \underline{U}^{-1} \underline{U}^2 \underline{U}^{-1} \\[4pt]
+&= \underline{I}
+\end{align}
+Hence, $\underline{R}$ is orthogonal.
+
+Furthermore, since $\det\underline{F} > 0$ and $\det\underline{U} > 0$,
+\[
+\det\underline{R} = \frac{\det\underline{F}}{\det\underline{U}} > 0
+\]
+so $\underline{R}$ is a \textbf{proper orthogonal} tensor.
+
+---
+
+Finally, defining
+\[
+\underline{V} = \underline{R}\underline{U}\underline{R}^T
+\]
+gives the left polar form:
+\[
+\underline{F} = \underline{V}\underline{R}
+\]
+
+---
+
+\textbf{Summary:}
+\[
+\boxed{
+\underline{F} = \underline{R}\underline{U} = \underline{V}\underline{R}
+}
+\quad \text{(Polar decomposition)}
+\]
+\[
+\underline{U} = \sqrt{\underline{F}^T\underline{F}}, 
+\qquad
+\underline{V} = \sqrt{\underline{F}\underline{F}^T},
+\qquad
+\det \underline{R} = +1
+\]
+\end{proof}
+
+\subsubsection{Geometric Interpretation of $\underline{U}$ and $\underline{R}$}
+
+\textbf{Right stretch tensor $\underline{U}$:}
+
+Using the spectral decomposition,
+\begin{align}
+\underline{U} 
+= \sum_{i=1}^{3} \lambda_i \, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\end{align}
+
+When $\underline{U}$ acts on a line element $d\underline{X}$,
+\begin{align}
+\underline{U}\, d\underline{X}
+&= \sum_{i=1}^{3} \lambda_i 
+   \underline{N}^{(i)} (\underline{N}^{(i)} \cdot d\underline{X}) \\[4pt]
+&= \sum_{i=1}^{3} \lambda_i\, dX_i\, \underline{N}^{(i)}
+\end{align}
+
+Hence, the result of $\underline{U}\, d\underline{X}$ 
+is an \textbf{extension of} $d\underline{X}$ by an amount $\lambda_i$ 
+in the principal directions $\underline{N}^{(i)}$.
+
+Thus, $\underline{U}$ represents a pure stretch 
+along the principal directions of deformation.
+
+---
+
+\textbf{Rotation tensor $\underline{R}$:}
+
+The rotation tensor $\underline{R}$ admits a similar geometric interpretation:
+it rotates the vector $d\underline{X}$ by an angle $\theta$ about an axis 
+through the origin in the direction of the eigenvector of $\underline{R}$ 
+associated with the eigenvalue $\lambda = 1$.
+
+\[
+\text{Axis of rotation: eigenvector } \underline{n}
+\quad \text{such that} \quad
+\underline{R}\underline{n} = \underline{n}
+\]
+
+\textbf{Trace relation:}
+\begin{align}
+\operatorname{tr}[\underline{R}] = 2\cos\theta + 1
+\end{align}
+
+\subsubsection{Left Cauchy–Green Deformation Tensor}
+
+The left Cauchy–Green deformation tensor connects back to the \textbf{current configuration}.
+
+\begin{align}
+d\underline{x} &= \underline{F} \, d\underline{X} \\[4pt]
+ds^2 &= d\underline{x}\cdot d\underline{x}
+= ( \underline{F} \, d\underline{X} ) \cdot ( \underline{F} \, d\underline{X} )
+= d\underline{X} \cdot (\underline{F}^T \underline{F}) \, d\underline{X}
+\end{align}
+
+Define:
+\begin{align}
+\underline{B} = \underline{F}\underline{F}^T
+\end{align}
+so that
+\begin{align}
+ds^2 = d\underline{x}\cdot d\underline{x} 
+= d\underline{X}\cdot \underline{C}\, d\underline{X},
+\quad
+d\underline{x}\cdot d\underline{x} 
+= d\underline{x}\cdot (\underline{B}\, d\underline{x})
+\end{align}
+
+Thus, $\underline{C} = \underline{F}^T \underline{F}$ (right Cauchy–Green tensor)  
+and $\underline{B} = \underline{F}\underline{F}^T$ (left Cauchy–Green tensor).
+
+---
+
+\textbf{Relation between $\underline{B}$ and $\underline{V}$:}
+\begin{align}
+\underline{B} = \underline{V}^2
+\end{align}
+
+Since both $\underline{C}$ and $\underline{B}$ are symmetric, positive definite tensors,
+they each possess three eigenvalues and three corresponding orthogonal eigenvectors.
+
+Let $\lambda_i^2$ be the eigenvalues of $\underline{C}$ with eigenvectors $\underline{N}^{(i)}$, and  
+$\mu_i^2$ be the eigenvalues of $\underline{B}$ with eigenvectors $\underline{n}^{(i)}$.
+
+---
+
+\textbf{Connection between right and left polar decompositions:}
+\begin{align}
+\underline{F} &= \underline{R}\underline{U} = \underline{V}\underline{R}
+\end{align}
+
+Hence,
+\begin{align}
+\underline{R}\underline{U}\underline{R}^T &= \underline{V}
+\end{align}
+which shows that $\underline{U}$ and $\underline{V}$ share the same principal stretches $\lambda_i$,
+but are expressed in different configurations.
+
+\[
+\underline{U} \leftrightarrow \text{reference configuration},
+\qquad
+\underline{V} \leftrightarrow \text{current configuration.}
+\]
+
+---
+
+\subsubsection{Eigenvalue Relations}
+
+If 
+\[
+\underline{C}\underline{N}^{(i)} = \lambda_i^2 \underline{N}^{(i)}
+\]
+then
+\[
+\underline{B}\underline{n}^{(i)} = \lambda_i^2 \underline{n}^{(i)}
+\]
+and
+\[
+\underline{n}^{(i)} = \underline{R}\,\underline{N}^{(i)}.
+\]
+
+\textbf{Proof:}
+\begin{align}
+\underline{B}\underline{n}^{(i)} 
+&= \underline{F}\underline{F}^T (\underline{R}\underline{N}^{(i)}) \\[4pt]
+&= (\underline{R}\underline{U})(\underline{R}\underline{U})^T \underline{R}\underline{N}^{(i)} \\[4pt]
+&= \underline{R}\underline{U}\underline{U}^T\underline{N}^{(i)} \\[4pt]
+&= \underline{R}\underline{U}^2\underline{N}^{(i)} \\[4pt]
+&= \lambda_i^2 (\underline{R}\underline{N}^{(i)}) = \lambda_i^2 \underline{n}^{(i)}
+\end{align}
+
+Thus, $\underline{n}^{(i)} = \underline{R}\underline{N}^{(i)}$ is an eigenvector of $\underline{B}$
+corresponding to the eigenvalue $\lambda_i^2$.
+
+---
+
+\subsubsection{Principal Directions of $\underline{C}$ and $\underline{U}$}
+
+\begin{itemize}
+    \item Under the \textbf{right polar decomposition} ($\underline{F} = \underline{R}\underline{U}$):  
+    $\underline{U}$ stretches $\underline{N}^{(i)}$ by $\lambda_i$, 
+    then $\underline{R}$ rotates the stretched vectors to $\underline{n}^{(i)}$.
+
+    \item Under the \textbf{left polar decomposition} ($\underline{F} = \underline{V}\underline{R}$):  
+    $\underline{R}$ first rotates $\underline{N}^{(i)}$ to $\underline{n}^{(i)}$, 
+    then $\underline{V}$ stretches $\underline{n}^{(i)}$ by $\lambda_i$.
+\end{itemize}
+
+\[
+\underline{F}\underline{N}^{(i)} = \lambda_i \underline{n}^{(i)}
+\qquad
+\underline{F}^T\underline{n}^{(i)} = \lambda_i \underline{N}^{(i)}
+\]
+
+---
+
+\subsubsection{Summary Diagram}
+
+\[
+\text{Reference configuration: } \underline{C},\ \lambda_i^2,\ \underline{N}^{(i)}
+\quad
+\xrightarrow{\ \underline{F}\ }
+\quad
+\text{Current configuration: } \underline{B},\ \lambda_i^2,\ \underline{n}^{(i)}
+\]
+
+---
+
+\subsection{General Strain Tensor}
+
+A general class of strain measures $\underline{E}$ can be defined as a symmetric tensor whose principal directions coincide with those of $\underline{U}$, and whose eigenvalues are functions of $\lambda_i$:
+\begin{align}
+E_i = f(\lambda_i)
+\end{align}
+
+That is,
+\[
+\underline{E} = \sum_{i=1}^{3} E_i \, \underline{N}^{(i)} \otimes \underline{N}^{(i)}
+\]
+
+\textbf{Properties:}
+\[
+f(1) = 0, \qquad f'(1) = 1, \qquad f'(\lambda_i) > 0 \text{ for all } \lambda_i > 0
+\]
+
+Examples of $f(\lambda)$ include:
+\begin{align*}
+\text{Green–Lagrange strain:} &\quad f(\lambda) = \tfrac{1}{2}(\lambda^2 - 1) \\[4pt]
+\text{Almansi strain:} &\quad f(\lambda) = \tfrac{1}{2}(1 - \lambda^{-2}) \\[4pt]
+\text{Hencky (logarithmic) strain:} &\quad f(\lambda) = \ln(\lambda)
+\end{align*}
+
+\subsubsection{Green–Lagrange Strain Tensor}
+
+The Green–Lagrange strain is defined as
+\begin{align}
+\underline{E} = \tfrac{1}{2}(\underline{C} - \underline{I})
+= \tfrac{1}{2}(\underline{F}^T \underline{F} - \underline{I})
+\end{align}
+
+In indicial notation:
+\begin{align}
+E_{ij} 
+&= \tfrac{1}{2}(C_{ij} - \delta_{ij}) 
+= \tfrac{1}{2}(F_{ki}F_{kj} - \delta_{ij})
+\end{align}
+
+Let
+\[
+x_i = X_i + u_i
+\quad \Rightarrow \quad
+\frac{\partial x_i}{\partial X_j}
+= \delta_{ij} + \frac{\partial u_i}{\partial X_j}
+\]
+so that
+\begin{align}
+E_{ij}
+&= \tfrac{1}{2}\Big[ 
+\frac{\partial u_i}{\partial X_j} 
++ \frac{\partial u_j}{\partial X_i} 
++ \frac{\partial u_k}{\partial X_i} 
+  \frac{\partial u_k}{\partial X_j}
+\Big]
+\end{align}
+
+\textbf{Interpretation:}  
+The Green–Lagrange strain consists of linear (symmetric part of the displacement gradient) and nonlinear (quadratic) terms.  
+Different equivalent forms:
+\[
+E_{ij} = \tfrac{1}{2}(u_{i,j} + u_{j,i} + u_{k,i}u_{k,j})
+\]
+
+---
+
+\subsubsection{Rigid Body Motion}
+
+For a rigid body motion (RBM):
+\[
+\underline{F} = \underline{R}
+\quad \Rightarrow \quad
+\underline{C} = \underline{R}^T \underline{R} = \underline{I}
+\]
+\[
+\underline{E} = \tfrac{1}{2}(\underline{C} - \underline{I}) = 0
+\]
+Hence, $\underline{E}$ vanishes under RBM, making it a good strain measure.
+
+---
+
+\subsubsection{Infinitesimal (Small) Strain Approximation}
+
+Define the infinitesimal strain tensor:
+\begin{align}
+\underline{\varepsilon} 
+= \tfrac{1}{2}(\nabla \underline{u} + \nabla \underline{u}^T)
+\end{align}
+
+In components:
+\[
+\varepsilon_{ij} = \tfrac{1}{2}\left(
+\frac{\partial u_i}{\partial x_j} 
++ \frac{\partial u_j}{\partial x_i}
+\right)
+\]
+
+---
+
+\textbf{Relation to Green–Lagrange strain:}
+\[
+\underline{E} 
+= \tfrac{1}{2}\big[(\nabla \underline{u}) + (\nabla \underline{u})^T + (\nabla \underline{u})^T (\nabla \underline{u})\big]
+\]
+When $\|\nabla \underline{u}\| \ll 1$, the quadratic term is negligible, and
+\[
+\underline{E} \approx \underline{\varepsilon}
+\]
+Thus, the infinitesimal strain is the linearized form of $\underline{E}$ valid for small deformations.
+
+---
+
+\subsubsection{Almansi (Eulerian) Strain Tensor}
+
+The Almansi strain is defined with respect to the \textbf{current configuration:}
+\begin{align}
+ds^2 - ds_0^2 = 2\, d\underline{x}\cdot \underline{e}\, d\underline{x}
+\end{align}
+
+Since $d\underline{x} = \underline{F}\, d\underline{X}$,
+\begin{align}
+\underline{e} 
+= \tfrac{1}{2}(\underline{I} - \underline{B}^{-1})
+= \tfrac{1}{2}(\underline{I} - \underline{F}^{-T} \underline{F}^{-1})
+\end{align}
+
+In index form:
+\begin{align}
+e_{ij} 
+= \tfrac{1}{2}\left(\delta_{ij} - (B^{-1})_{ij}\right)
+= \tfrac{1}{2}\left(\delta_{ij} - F^{-1}_{ki} F^{-1}_{kj}\right)
+\end{align}
+
+---
+
+\textbf{Relation to Principal Directions:}
+The Almansi strain $\underline{e}$ shares the same principal directions as the left stretch tensor $\underline{V}$:
+\[
+\underline{B} = \underline{V}^2
+\quad \Rightarrow \quad
+\underline{e} 
+= \tfrac{1}{2}(\underline{I} - \underline{V}^{-2})
+\]
+and
+\[
+e_i = \tfrac{1}{2}(1 - \lambda_i^{-2})
+\]
+
+Thus, $\underline{E}$ and $\underline{e}$ have identical principal directions, 
+but refer to different configurations:
+\[
+\underline{E} \rightarrow \text{Reference (Lagrangian)}, 
+\quad
+\underline{e} \rightarrow \text{Current (Eulerian)}
+\]
+
+\subsubsection{Example: Simple Shear}
+
+Parallel planes are displaced relative to each other by an amount proportional to their distance apart.
+
+\[
+\tan\gamma = K
+\]
+
+
+\textbf{Equations of Motion:}
+\[
+x_1 = X_1 + K X_2, 
+\quad x_2 = X_2, 
+\quad x_3 = X_3
+\]
+
+\textbf{Deformation Gradient:}
+\[
+[F] =
+\begin{bmatrix}
+1 & K & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\]
+Only a function of $K = \tan \gamma$.
+
+\textbf{Jacobian:}
+\[
+J = \det F = 1 \quad \Rightarrow \quad \text{No volume change (incompressible)}
+\]
+
+\textbf{Right Cauchy–Green Tensor:}
+\[
+[C] = F^T F =
+\begin{bmatrix}
+1 & K & 0 \\
+K & K^2 + 1 & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\]
+
+\textbf{Green–Lagrange Strain:}
+\[
+[E] = \tfrac{1}{2}(C - I)
+= \tfrac{1}{2}
+\begin{bmatrix}
+0 & K & 0 \\
+K & K^2 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+---
+
+\subsubsection{Extension}
+
+Consider a triaxial stretch:
+\[
+x_1 = \lambda_1 X_1, \quad
+x_2 = \lambda_2 X_2, \quad
+x_3 = \lambda_3 X_3
+\]
+
+\textbf{Deformation Gradient:}
+\[
+[F] =
+\begin{bmatrix}
+\lambda_1 & 0 & 0 \\
+0 & \lambda_2 & 0 \\
+0 & 0 & \lambda_3
+\end{bmatrix}
+\]
+
+\textbf{Green Strain:}
+\[
+[E] = \tfrac{1}{2}(C - I)
+= \tfrac{1}{2}
+\begin{bmatrix}
+\lambda_1^2 - 1 & 0 & 0 \\
+0 & \lambda_2^2 - 1 & 0 \\
+0 & 0 & \lambda_3^2 - 1
+\end{bmatrix}
+\]
+
+\textbf{Special Cases:}
+\begin{itemize}
+\item $\lambda_1 = \lambda_2 = \lambda_3 \Rightarrow$ uniform dilation.
+\item If $\lambda_1 \lambda_2 \lambda_3 = 1$, the deformation is volume-preserving.
+\end{itemize}
+
+---
+
+\subsubsection{Small Deformation (Infinitesimal Strain)}
+
+For small displacements:
+\[
+x_i = X_i + u_i(X, t)
+\]
+then
+\[
+\frac{\partial x_i}{\partial X_j}
+= \delta_{ij} + \frac{\partial u_i}{\partial X_j}
+\]
+
+The infinitesimal strain tensor is defined as
+\[
+\varepsilon_{ij} = \tfrac{1}{2}\left(
+\frac{\partial u_i}{\partial X_j} + \frac{\partial u_j}{\partial X_i}
+\right)
+\]
+
+If $\|\nabla u\| \ll 1$, quadratic terms are negligible, and
+\[
+E_{ij} \approx \varepsilon_{ij}
+\]
+
+---
+
+\subsubsection{Geometric Interpretation of Infinitesimal Strain}
+
+For infinitesimal strain ($E \approx \varepsilon$):
+\[
+ds^2 - ds_0^2 = 2\, d\underline{X}\cdot \underline{\varepsilon}\, d\underline{X}
+\]
+
+Let $d\underline{X} = dS_0\, \underline{N}$, then
+\[
+ds^2 = ds_0^2 + 2\, ds_0^2\, \underline{N}\cdot \underline{\varepsilon}\, \underline{N}
+\]
+
+Thus, the relative change in length is
+\[
+\frac{ds - ds_0}{ds_0} = \underline{N}\cdot \underline{\varepsilon}\, \underline{N}
+\]
+
+For principal directions $\underline{N}^{(i)}$,
+\[
+\varepsilon_i = \underline{N}^{(i)}\cdot \underline{\varepsilon}\, \underline{N}^{(i)}
+\]
+represents the normal strain along that direction.
+
+---
+
+\subsubsection{Engineering Shear Strain}
+
+Let $\underline{N}^{(1)}$ and $\underline{N}^{(2)}$ be initially orthogonal unit vectors.  
+After deformation, the angle between the lines changes by $\gamma$.
+
+\[
+\cos(\tfrac{\pi}{2} - \gamma)
+= 2\, \underline{N}^{(1)}\cdot \underline{\varepsilon}\, \underline{N}^{(2)}
+\]
+\[
+\Rightarrow \gamma = 2\, \varepsilon_{12}
+\]
+
+Thus,
+\[
+\boxed{\gamma = 2\, \varepsilon_{12}}
+\quad \text{and} \quad
+\varepsilon_{12} = \tfrac{1}{2}\gamma
+\]
+
+---
+
+\textbf{Remarks:}
+\begin{itemize}
+\item $\gamma$ is the \emph{engineering shear strain} — not a tensorial quantity.
+\item $\varepsilon_{ij}$ is the \emph{tensorial shear strain} — a true component of the strain tensor.
+\end{itemize}
+
+\subsection{Infinitesimal Strain Tensor}
+
+The infinitesimal strain tensor is defined as
+\begin{align}
+\varepsilon_{ij} = \tfrac{1}{2}\left( 
+\frac{\partial u_i}{\partial x_j} 
++ \frac{\partial u_j}{\partial x_i}
+\right)
+\end{align}
+It is symmetric by definition:
+\[
+\varepsilon_{ij} = \varepsilon_{ji}
+\]
+
+---
+
+\subsubsection{Geometric Interpretation}
+
+Consider two infinitesimal fibers $dX_1, dX_2$ along coordinate directions.  
+If $u_i(X_1, X_2, X_3)$ are the displacement components, then for points $A, B, C$ on these fibers:
+
+\[
+u_B^i = u_A^i + \frac{\partial u_i}{\partial X_1} dX_1, 
+\quad
+u_C^i = u_A^i + \frac{\partial u_i}{\partial X_2} dX_2
+\]
+
+Elongation of fiber $AB$ of initial length $dX_1$:
+\[
+\frac{u_B^1 - u_A^1}{dX_1} = \frac{\partial u_1}{\partial X_1} = \varepsilon_{11}
+\]
+Similarly for fiber $AC$:
+\[
+\frac{u_C^2 - u_A^2}{dX_2} = \frac{\partial u_2}{\partial X_2} = \varepsilon_{22}
+\]
+
+Thus, $\varepsilon_{11}, \varepsilon_{22}, \varepsilon_{33}$ are the \textbf{normal strain components}.
+
+---
+
+\subsubsection{Shear Strain and Rotation of Fibers}
+
+The fiber $AB$ is rotated by an angle $\beta$ given by
+\[
+\tan\beta = \frac{\partial u_2}{\partial X_1}
+\]
+Similarly, the fiber $AC$ is rotated by an angle $\gamma$ given by
+\[
+\tan\gamma = \frac{\partial u_1}{\partial X_2}
+\]
+The change in the originally right angle $BAC$ is
+\[
+\Delta\alpha = \beta + \gamma = 
+\frac{\partial u_2}{\partial X_1} 
++ \frac{\partial u_1}{\partial X_2} 
+= 2\,\varepsilon_{12}
+\]
+Hence, $\varepsilon_{12}$, $\varepsilon_{13}$, $\varepsilon_{23}$ are the \textbf{shear strain components.}
+
+\[
+\boxed{\gamma_{ij} = 2\, \varepsilon_{ij}}
+\]
+
+Angles $\beta$ and $\gamma$ are taken positive if the corresponding fiber rotates toward the positive coordinate direction.
+
+---
+
+\subsubsection{Infinitesimal Rotation Tensor}
+
+We now define the infinitesimal rotation tensor:
+\begin{align}
+\omega_{ij} 
+= \tfrac{1}{2}\left(
+\frac{\partial u_i}{\partial x_j}
+- \frac{\partial u_j}{\partial x_i}
+\right)
+\end{align}
+It is antisymmetric:
+\[
+\omega_{ij} = -\omega_{ji}
+\]
+
+In matrix form:
+\[
+[\omega] =
+\begin{bmatrix}
+0 & -\omega_3 & \omega_2 \\
+\omega_3 & 0 & -\omega_1 \\
+-\omega_2 & \omega_1 & 0
+\end{bmatrix}
+\]
+
+Each component corresponds to a rotation about a principal axis:
+\[
+\omega_1 \Rightarrow \text{rotation about } x_1, \quad
+\omega_2 \Rightarrow \text{rotation about } x_2, \quad
+\omega_3 \Rightarrow \text{rotation about } x_3
+\]
+
+---
+
+\subsubsection{Decomposition of the Displacement Gradient}
+
+Any displacement gradient can be decomposed as:
+\[
+\nabla \underline{u} 
+= \underline{\varepsilon} + \underline{\omega}
+\]
+where $\underline{\varepsilon}$ is symmetric and $\underline{\omega}$ is antisymmetric.
+
+Hence, any infinitesimal deformation consists of:
+\begin{itemize}
+\item A \textbf{pure strain} (shape change without rigid rotation)
+\item A \textbf{rigid body rotation}
+\end{itemize}
+
+\[
+\frac{\partial u_i}{\partial x_j}
+= \varepsilon_{ij} + \omega_{ij}
+\]
+
+---
+
+\subsubsection{Rigid Body Motion}
+
+For rigid body motion:
+\[
+\underline{F} = \underline{R}, 
+\quad \underline{C} = \underline{I}, 
+\quad \underline{E} = 0
+\]
+and
+\[
+\underline{u} = \underline{\omega}\, \underline{X} + \underline{d}
+\]
+
+Thus, for small rotations ($|\nabla u| = O(\varepsilon)$),
+\[
+\underline{\varepsilon} = 0, \quad \underline{\omega} = \tfrac{1}{2}(\nabla u - \nabla u^T)
+\]
+
+---
+
+\subsubsection{Axial Vector of the Infinitesimal Rotation Tensor}
+
+The antisymmetric tensor $\omega_{ij}$ corresponds to an axial vector $\zeta_i$ defined as:
+\[
+\zeta_i = \tfrac{1}{2}\, \epsilon_{ijk}\, \omega_{jk}
+\]
+or equivalently:
+\[
+[\underline{\zeta}] = 
+\begin{bmatrix}
+\omega_{23} \\ 
+\omega_{31} \\ 
+\omega_{12}
+\end{bmatrix}
+\]
+
+Hence:
+\[
+\boxed{\underline{\omega}\, \underline{X} = \underline{\zeta} \times \underline{X}}
+\]
+since
+\[
+(\underline{\zeta} \times \underline{X})_i 
+= \epsilon_{ijk} \zeta_j X_k
+= \omega_{ik} X_k
+\]
+showing that $\underline{\omega}$ generates the infinitesimal rotation of the body about $\underline{\zeta}$.
+
+\subsection{Infinitesimal Rotation and Volume Change}
+
+\subsubsection{Infinitesimal Rotation Field}
+
+At any point $P$, for an infinitesimal displacement field, the infinitesimal rotation of the body in the neighborhood of $P$ is given by the axial vector $\boldsymbol{\zeta}$:
+\[
+\boldsymbol{\zeta} = \tfrac{1}{2} \, \nabla \times \mathbf{u}
+\]
+
+The relative displacement of a neighboring point $P'$ with respect to $P$ is:
+\[
+d\mathbf{u} = \mathbf{u}(P') - \mathbf{u}(P)
+= (\nabla \mathbf{u})\, d\mathbf{X}
+\]
+
+Under small deformation, this can be written as:
+\[
+d\mathbf{u} = \boldsymbol{\omega} \, d\mathbf{X} 
+= \boldsymbol{\zeta} \times d\mathbf{X}
+\]
+
+Hence, the relative displacement corresponds to the infinitesimal rotation of $d\mathbf{X}$ about the axis $\boldsymbol{\zeta}$.
+
+The magnitude $|\boldsymbol{\zeta}|$ represents the infinitesimal angle of rotation.
+
+---
+
+\subsubsection{Angle of Rotation}
+
+For small $|\boldsymbol{\zeta}|$,
+\[
+|d\mathbf{u}| = |\boldsymbol{\zeta} \times d\mathbf{X}|
+= |\boldsymbol{\zeta}|\,|d\mathbf{X}|\,\sin\theta
+\approx |\boldsymbol{\zeta}|\,|d\mathbf{X}|
+\]
+Thus, $|\boldsymbol{\zeta}|$ expresses the infinitesimal rotation angle.
+
+It can be shown that:
+\[
+\boldsymbol{\zeta} = \alpha\, \mathbf{n}
+\]
+where $\alpha$ is the infinitesimal rotation angle and $\mathbf{n}$ is the unit eigenvector of the rotation tensor $\mathbf{R}$:
+\[
+\mathbf{R} = \mathbf{I} + \alpha\, [\mathbf{n}]_\times + O(\alpha^2)
+\]
+
+---
+
+\subsection{Jacobian and Volume Change}
+
+The infinitesimal volume element in the reference configuration is:
+\[
+dV_0 = dX_1\, dX_2\, dX_3
+\]
+
+After deformation:
+\[
+dV = \det(\mathbf{F})\, dV_0 = J\, dV_0
+\]
+where $J = \det \mathbf{F}$ is the \textbf{Jacobian of deformation.}
+
+\textbf{Interpretation:}
+$J$ gives the ratio of deformed to undeformed volume:
+\[
+J = \frac{dV}{dV_0}
+\]
+
+---
+
+\subsubsection{Principal Directions}
+
+Let the deformation gradient in the principal stretch directions be:
+\[
+\mathbf{F} = \mathbf{R}\, \mathbf{U}, 
+\quad \text{so that} \quad \det \mathbf{F} = \det \mathbf{U}
+\]
+Then:
+\[
+J = \lambda_1\, \lambda_2\, \lambda_3
+\]
+
+Thus, the normalized volume change is:
+\[
+\frac{\Delta V}{V_0} = J - 1
+\]
+
+---
+
+\subsubsection{Infinitesimal Volume Change}
+
+For small deformations:
+\[
+\mathbf{F} = \mathbf{I} + \nabla \mathbf{u}
+\]
+\[
+J = \det(\mathbf{I} + \nabla \mathbf{u})
+\approx 1 + \nabla \cdot \mathbf{u} = 1 + \text{tr}(\varepsilon)
+\]
+Hence:
+\[
+\frac{\Delta V}{V_0} = \nabla \cdot \mathbf{u} = \varepsilon_{kk}
+\]
+where $\varepsilon_{kk}$ is the \textbf{volumetric strain.}
+
+---
+
+\subsubsection{Uniform Dilatation}
+
+For a uniform expansion or contraction:
+\[
+\varepsilon_{ij} = e\, \delta_{ij}
+\]
+where $e$ is constant.
+
+If $e > 0$: expansion,  
+if $e < 0$: contraction.
+
+\[
+\varepsilon =
+\begin{bmatrix}
+e & 0 & 0 \\
+0 & e & 0 \\
+0 & 0 & e
+\end{bmatrix}
+\]
+
+Then:
+\[
+\varepsilon_{kk} = 3e
+\]
+and the total volume change is:
+\[
+\frac{\Delta V}{V_0} = 3e
+\]
+The displacement field for uniform dilatation is:
+\[
+\mathbf{u} = e\, \mathbf{X}
+\]
+
+---
+
+\textbf{Summary:}
+\begin{itemize}
+\item $\boldsymbol{\zeta} = \tfrac{1}{2} \nabla \times \mathbf{u}$ — infinitesimal rotation vector
+\item $J = \det \mathbf{F}$ — Jacobian of deformation (volume ratio)
+\item $\varepsilon_{kk} = \text{tr}(\varepsilon)$ — infinitesimal volumetric strain
+\item For uniform strain, $\frac{\Delta V}{V_0} = 3e$
+\end{itemize}
+
+\subsubsection{Pure Shear under Small Strains (Isochoric Case)}
+
+Let the displacement field be
+\[
+u_1 = \varepsilon X_2, 
+\quad
+u_2 = \varepsilon X_1,
+\quad
+u_3 = 0
+\]
+
+Then the strain tensor is:
+\[
+[\varepsilon] =
+\begin{bmatrix}
+0 & \varepsilon & 0 \\
+\varepsilon & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+This corresponds to a pure shear deformation in the $X_1$–$X_2$ plane.
+
+
+
+The principal directions are rotated by $\theta = 45^\circ$, and the principal strains are $\pm \varepsilon$.
+
+\[
+[Q] =
+\begin{bmatrix}
+\cos\theta & \sin\theta & 0 \\
+-\sin\theta & \cos\theta & 0 \\
+0 & 0 & 1
+\end{bmatrix},
+\quad
+[\varepsilon'] = Q [\varepsilon] Q^T =
+\begin{bmatrix}
+\varepsilon & 0 & 0 \\
+0 & -\varepsilon & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+The deformation is \textbf{isochoric} (volume-preserving):
+\[
+\Delta V/V_0 = (1+\varepsilon)(1-\varepsilon) - 1 = -\varepsilon^2 \approx 0
+\]
+
+---
+
+\subsubsection{Field with Rotation Component}
+
+Now consider:
+\[
+u_1 = \varepsilon X_2, 
+\quad
+u_2 = 0,
+\quad
+u_3 = 0
+\]
+
+Then:
+\[
+[\varepsilon] =
+\begin{bmatrix}
+0 & \tfrac{\varepsilon}{2} & 0 \\
+\tfrac{\varepsilon}{2} & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix},
+\quad
+[\omega] =
+\tfrac{1}{2}
+\begin{bmatrix}
+0 & -\varepsilon & 0 \\
+\varepsilon & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+The antisymmetric part corresponds to an infinitesimal rotation vector:
+\[
+\boldsymbol{\zeta} =
+\begin{bmatrix}
+0 \\ 0 \\ -\tfrac{\varepsilon}{2}
+\end{bmatrix}
+= -\tfrac{\varepsilon}{2}\, \mathbf{e}_3
+\]
+
+Hence, this deformation field represents not only shear but also a small rotation about the $x_3$-axis.
+
+---
+
+\subsubsection{Eliminating the Rotation (Obtaining Pure Shear)}
+
+To remove rotation, superimpose an equal and opposite infinitesimal rotation:
+\[
+\mathbf{u}^{(\omega)} =
+\begin{bmatrix}
+-\varepsilon X_2 \\
+0 \\
+0
+\end{bmatrix}
+\]
+which corresponds to
+\[
+[\omega] =
+\begin{bmatrix}
+0 & \varepsilon & 0 \\
+-\varepsilon & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+Superposing the two fields:
+\[
+\begin{aligned}
+u_1 &= \varepsilon X_2 + (-\varepsilon X_2) = \varepsilon X_2,\\
+u_2 &= \varepsilon X_1 + 0 = \varepsilon X_1,\\
+u_3 &= 0
+\end{aligned}
+\]
+restores pure shear with no net rotation.
+
+---
+
+\subsubsection{General Relation for Small Strain}
+
+The infinitesimal strain tensor is the symmetric part of the displacement gradient:
+\[
+\varepsilon_{ij} = \tfrac{1}{2}
+\left( 
+\frac{\partial u_i}{\partial X_j}
++ 
+\frac{\partial u_j}{\partial X_i}
+\right)
+\]
+and the antisymmetric part gives infinitesimal rotation:
+\[
+\omega_{ij} = \tfrac{1}{2}
+\left( 
+\frac{\partial u_i}{\partial X_j}
+-
+\frac{\partial u_j}{\partial X_i}
+\right)
+\]
+
+In general:
+\[
+\nabla \mathbf{u} = \boldsymbol{\varepsilon} + \boldsymbol{\omega}
+\]
+and for small deformations:
+\[
+\text{volumetric strain: } 
+\varepsilon_v = \tfrac{1}{3}\, \text{tr}(\boldsymbol{\varepsilon}),
+\quad
+\text{deviatoric strain: }
+\varepsilon_{ij}' = \varepsilon_{ij} - \tfrac{1}{3}\varepsilon_{kk}\,\delta_{ij}
+\]
+
+---
+
+\textbf{Summary:}
+\begin{itemize}
+\item Pure shear → equal and opposite principal strains $\pm \varepsilon$ at $45^\circ$.
+\item Isochoric deformation → $\Delta V / V_0 \approx 0$.
+\item Deformation gradient decomposes into symmetric strain + antisymmetric rotation.
+\item Rotation vector $\boldsymbol{\zeta}$ defines the local axis of infinitesimal rotation.
+\end{itemize}
+
+\subsection{Compatibility Equations}
+
+For a continuous displacement field $u_i(X_j)$, the infinitesimal strains are given by:
+\[
+\varepsilon_{ij} = \tfrac{1}{2}\left(
+\frac{\partial u_i}{\partial X_j} +
+\frac{\partial u_j}{\partial X_i}
+\right)
+\]
+
+Taking second derivatives:
+\[
+\varepsilon_{ij,kl} =
+\tfrac{1}{2}\left(
+u_{i,jkl} + u_{j,ikl}
+\right)
+\]
+
+Since mixed partial derivatives commute
+($u_{i,jkl} = u_{i,jlk}$, etc.),
+certain relationships among the strain components must hold
+for a single-valued displacement field to exist.  
+These are the \textbf{compatibility equations.}
+
+\[
+\boxed{
+\varepsilon_{ij,kl} + \varepsilon_{kl,ij} 
+- \varepsilon_{ik,jl} - \varepsilon_{jl,ik} = 0
+}
+\]
+
+They ensure that the strain field $\varepsilon_{ij}$ 
+is derivable from a continuous and single-valued displacement field $u_i$.
+
+---
+
+\subsubsection{Independent Equations}
+
+In three dimensions, there are six independent strain components
+and six independent compatibility equations.
+The rest are either identities or redundant due to symmetry of $\varepsilon_{ij}$.
+
+\[
+\begin{aligned}
+(1)\;& \varepsilon_{11,22} + \varepsilon_{22,11} - 2\varepsilon_{12,12} = 0, \\
+(2)\;& \varepsilon_{22,33} + \varepsilon_{33,22} - 2\varepsilon_{23,23} = 0, \\
+(3)\;& \varepsilon_{33,11} + \varepsilon_{11,33} - 2\varepsilon_{13,13} = 0, \\
+(4)\;& \varepsilon_{12,23} + \varepsilon_{23,12} - \varepsilon_{13,22} - \varepsilon_{22,13} = 0, \\
+(5)\;& \varepsilon_{23,31} + \varepsilon_{31,23} - \varepsilon_{21,33} - \varepsilon_{33,21} = 0, \\
+(6)\;& \varepsilon_{31,12} + \varepsilon_{12,31} - \varepsilon_{32,11} - \varepsilon_{11,32} = 0.
+\end{aligned}
+\]
+
+These are necessary and sufficient to guarantee
+the existence of a continuous displacement field.
+
+---
+
+\subsubsection{Geometric Interpretation}
+
+If the strain field $\varepsilon_{ij}$ satisfies these equations,
+then neighboring infinitesimal line elements deform consistently,
+and no “gaps” or “overlaps” occur when integrating the strain field across the body.
+
+If the equations are not satisfied,
+then the strain field corresponds to an incompatible deformation
+(i.e., one that cannot be produced by a single-valued $u_i$ field).
+
+Compatibility thus ensures that deformations are geometrically consistent
+throughout a \emph{simply connected} domain
+(i.e., one without holes).
+
+---
+
+\subsubsection{Path-Independence and Single-Valuedness of $u_i$}
+
+Let $\mathbf{P}(\bar{X}_1, \bar{X}_2, \bar{X}_3)$ be a reference point
+where $u_i$ is specified.
+For any other point $\mathbf{P}'(X_1, X_2, X_3)$, the displacement is obtained via
+integration along a curve $\Gamma$ joining $\mathbf{P}$ to $\mathbf{P}'$:
+\[
+u_i = \bar{u}_i + \int_{\Gamma} u_{i,j}\, dX_j
+\]
+For $u_i$ to be single-valued and continuous,
+the integral must depend only on the end points,
+not on the path $\Gamma$.
+That is, the integral must be \emph{exact}:
+\[
+\oint_{\Gamma} u_{i,j}\, dX_j = 0
+\]
+for any closed path $\Gamma$.
+
+---
+
+\subsubsection{Césaro Line Integral Formulation}
+
+Writing $u_{i,j}$ in terms of $\varepsilon_{ij}$ and $\omega_{ij}$:
+\[
+u_{i,j} = \varepsilon_{ij} + \omega_{ij}
+\]
+then:
+\[
+du_i = u_{i,j}\, dX_j
+= (\varepsilon_{ij} + \omega_{ij})\, dX_j
+\]
+
+For path independence, this differential must be \textbf{exact}.
+Thus:
+\[
+\frac{\partial u_{i,j}}{\partial X_k}
+= \frac{\partial u_{i,k}}{\partial X_j}
+\Rightarrow
+\varepsilon_{ij,kl} + \varepsilon_{kl,ij} 
+- \varepsilon_{ik,jl} - \varepsilon_{jl,ik} = 0
+\]
+which recovers the compatibility condition.
+
+---
+
+\subsubsection{Physical Meaning}
+
+The compatibility conditions express the requirement that
+a given strain distribution corresponds to a possible (continuous) displacement field.
+
+If the strain field fails these conditions,
+then “residual stresses” or “incompatibility” exist —
+as occurs in bodies with internal constraints or dislocations.
+
+---
+\section{Balance Laws}
+
+\subsection{Fundamental Postulates}
+
+\subsubsection{Density}
+At every material point $\mathbf{x}$ and time $t$, there exists a scalar field
+\[
+\rho(\mathbf{x},t) > 0
+\]
+called the \textbf{mass density}, such that the mass of a region $D$ is given by
+\[
+m(D,t) = \int_D \rho(\mathbf{x},t)\, dV
+\]
+Physically, $\rho$ is the limiting ratio of the mass $\Delta m$ to the volume $\Delta V$:
+\[
+\rho = \lim_{\Delta V \to 0} \frac{\Delta m}{\Delta V}
+\]
+
+---
+
+\subsubsection{Body Force}
+There exists a vector field $\mathbf{b}(\mathbf{x},t)$, called the \textbf{body force per unit volume}, such that the total body force acting on $D$ is
+\[
+\int_D \mathbf{b}(\mathbf{x},t)\, dV
+\]
+Typical examples include gravitational and electromagnetic forces.
+
+If $\mathbf{b} = \rho \mathbf{g}$, then
+\[
+[\mathbf{b}] = \frac{\text{force}}{\text{volume}} = \frac{mg}{V} = \rho \mathbf{g}
+\]
+
+---
+
+\subsubsection{Traction (Surface Force)}
+
+There exists a vector-valued function $\mathbf{T}(\mathbf{x},t,\mathbf{n})$, where $\mathbf{n}$ is the unit normal to the surface $\partial D$, called the \textbf{traction vector}, such that the total surface force acting on $D$ by the surrounding material is:
+\[
+\int_{\partial D} \mathbf{T}(\mathbf{x},t,\mathbf{n})\, dS
+\]
+
+The infinitesimal traction on a surface element $\Delta S$ is defined by:
+\[
+\mathbf{T} = \lim_{\Delta S \to 0} \frac{\Delta \mathbf{F}}{\Delta S}
+\quad \text{with units } \left[ \frac{\text{N}}{\text{m}^2} \right]
+\]
+where $\Delta \mathbf{F}$ is the force exerted by the exterior material across $\Delta S$.
+
+
+---
+
+\subsection{Cauchy’s Theorem}
+
+The \textbf{Cauchy stress principle} asserts that the traction on any plane with unit normal $\mathbf{n}$ passing through a point is a linear function of $\mathbf{n}$:
+\[
+\mathbf{T}(\mathbf{x},t,\mathbf{n}) = \boldsymbol{\sigma}(\mathbf{x},t)\, \mathbf{n}
+\]
+where $\boldsymbol{\sigma}$ is the \textbf{Cauchy stress tensor}.
+
+This implies that the stress tensor fully characterizes the state of stress at a point, since it defines the traction vector for all possible orientations of $\mathbf{n}$.
+
+---
+
+\subsection{Localization Theorem}
+
+Let $g(\mathbf{x})$ be a continuous scalar or vector function in a region $\mathcal{V}$, and let $D \subset \mathcal{V}$ be any subregion.  
+If
+\[
+\int_D g(\mathbf{x})\, dV = 0 \quad \forall D \subset \mathcal{V}
+\]
+then
+\[
+g(\mathbf{x}) = 0 \quad \forall \mathbf{x} \in \mathcal{V}.
+\]
+
+---
+
+\begin{proof}
+Suppose $g(\mathbf{x}^*) \neq 0$ for some point $\mathbf{x}^* \in \mathcal{V}$.
+By continuity, there exists a small ball $A$ centered at $\mathbf{x}^*$ such that $g(\mathbf{x}) > 0$ for all $\mathbf{x} \in A$.
+
+Choose $D = A \cap \mathcal{V}$.
+Then:
+\[
+\int_D g(\mathbf{x})\, dV > 0
+\]
+which contradicts the assumption that $\int_D g(\mathbf{x})\, dV = 0$ for all $D$.
+Hence, $g(\mathbf{x}) = 0$ everywhere in $\mathcal{V}$.
+
+
+\end{proof}
+
+
+---
+
+\textbf{Physical meaning:}
+The localization theorem allows us to convert integral equations (e.g., balance of momentum over a control volume) into \emph{local differential equations} that hold pointwise throughout the continuum.
+
+\subsection{Conservation of Mass}
+
+\subsubsection{Lagrangian (Material) Formulation}
+
+We follow a material domain $D_t$ that moves with the body through time:
+\[
+D_0 \xrightarrow[]{t=t_1} D_{t_1} \xrightarrow[]{t=t_2} D_{t_2}
+\]
+
+The total mass in a material domain is constant:
+\[
+\frac{d}{dt}\int_{D_t} \rho\, dV = 0
+\]
+Using the deformation gradient $\mathbf{F} = \frac{\partial \mathbf{x}}{\partial \mathbf{X}}$ and its determinant $J = \det \mathbf{F}$, we write
+\[
+\frac{d}{dt}\int_{D_0} \rho\, J\, dV_0 = 0
+\]
+which localizes to
+\[
+\frac{d}{dt}(\rho J) = 0
+\quad \text{or equivalently} \quad
+\rho J = \rho_0 = \text{constant.}
+\]
+
+Hence,
+\[
+\rho = \frac{\rho_0}{J}, \qquad J > 0.
+\]
+
+---
+
+\subsubsection{Eulerian (Spatial) Formulation}
+
+Consider a spatially fixed control volume $D$.
+Conservation of mass requires that the rate of change of mass inside $D$
+equals the net mass flux across its boundary $\partial D$:
+\[
+\frac{d}{dt} \int_D \rho\, dV + \int_{\partial D} \rho\, \mathbf{v} \cdot \mathbf{n}\, dS = 0
+\]
+
+Applying the divergence theorem:
+\[
+\int_D \left( \frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{v}) \right)\, dV = 0
+\]
+Since this must hold for any $D$, we localize to obtain the
+\textbf{continuity equation}:
+\[
+\boxed{
+\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{v}) = 0
+}
+\]
+
+Expanding the divergence term:
+\[
+\frac{\partial \rho}{\partial t} + \mathbf{v} \cdot \nabla \rho + \rho\, \nabla \cdot \mathbf{v} = 0
+\]
+or, using the material derivative $D\rho/Dt$:
+\[
+\frac{D\rho}{Dt} + \rho\, \nabla \cdot \mathbf{v} = 0
+\]
+
+---
+
+\subsubsection{Incompressibility}
+
+For an incompressible material:
+\[
+\frac{D\rho}{Dt} = 0
+\quad \Rightarrow \quad
+\rho = \text{constant}
+\quad \Rightarrow \quad
+\nabla \cdot \mathbf{v} = 0
+\]
+
+---
+
+\subsubsection{Relation Between Lagrangian and Eulerian Forms}
+
+From $\frac{d}{dt}(\rho J) = 0$, we obtain:
+\[
+\dot{\rho} J + \rho \dot{J} = 0
+\quad \Rightarrow \quad
+\frac{\dot{J}}{J} = -\frac{\dot{\rho}}{\rho}
+\]
+
+But since
+\[
+\dot{J} = J\, \nabla \cdot \mathbf{v}
+\]
+we have
+\[
+\frac{D\rho}{Dt} + \rho\, \nabla \cdot \mathbf{v} = 0
+\]
+which is precisely the Eulerian continuity equation.
+
+---
+
+\subsubsection{Reynolds Transport Theorem (RTT)}
+
+For any scalar field $\phi(\mathbf{x},t)$ and a material volume $D_t$:
+\[
+\frac{d}{dt} \int_{D_t} \phi\, dV
+= \int_{D_t} \left( \frac{\partial \phi}{\partial t} + \nabla \cdot (\phi \mathbf{v}) \right) dV
+\]
+
+\textbf{Proof:}
+\[
+\frac{d}{dt} \int_{D_t} \phi\, dV
+= \int_{D_t} \frac{\partial \phi}{\partial t}\, dV
++ \int_{\partial D_t} \phi\, \mathbf{v} \cdot \mathbf{n}\, dS
+\]
+and by the divergence theorem:
+\[
+\int_{\partial D_t} \phi\, \mathbf{v} \cdot \mathbf{n}\, dS
+= \int_{D_t} \nabla \cdot (\phi \mathbf{v})\, dV
+\]
+so
+\[
+\frac{d}{dt} \int_{D_t} \phi\, dV
+= \int_{D_t} \left( \frac{\partial \phi}{\partial t} + \nabla \cdot (\phi \mathbf{v}) \right) dV
+\]
+as required.
+
+---
+
+\textbf{Special Case: Conservation of Mass}
+
+Let $\phi = \rho$, then
+\[
+\frac{d}{dt} \int_{D_t} \rho\, dV = 0
+\quad \Rightarrow \quad
+\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{v}) = 0
+\]
+
+\textbf{Summary:}
+\begin{align*}
+\text{Lagrangian: } & \frac{d}{dt}(\rho J) = 0, \\
+\text{Eulerian: } & \frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \mathbf{v}) = 0, \\
+\text{Incompressible: } & \nabla \cdot \mathbf{v} = 0.
+\end{align*}
+
+\subsection{Laws of Motion}
+
+We follow the \textbf{material volume} (Lagrangian description).
+
+---
+
+\subsubsection{Linear Momentum (Force Equilibrium)}
+
+Let $\mathbf{p} = \rho \mathbf{v}$ denote the linear momentum density.
+The total linear momentum of a material volume $D_t$ is
+\[
+\mathbf{P} = \int_{D_t} \rho \mathbf{v}\, dV
+\]
+Newton’s second law states that the rate of change of momentum equals the total external force acting on $D_t$:
+\[
+\frac{d}{dt} \int_{D_t} \rho \mathbf{v}\, dV = 
+\int_{D_t} \rho \mathbf{b}\, dV + \int_{\partial D_t} \mathbf{T}\, dS
+\]
+where $\rho \mathbf{b}$ is the body force per unit volume and $\mathbf{T}$ is the traction on $\partial D_t$.
+
+---
+
+\subsubsection{Angular Momentum (Moment Equilibrium)}
+
+The total angular momentum of $D_t$ is
+\[
+\mathbf{H} = \int_{D_t} \rho\, \mathbf{x} \times \mathbf{v}\, dV
+\]
+and the total external moment is
+\[
+\dot{\mathbf{H}} = \int_{D_t} \rho\, \mathbf{x} \times \mathbf{b}\, dV 
++ \int_{\partial D_t} \mathbf{x} \times \mathbf{T}\, dS
+\]
+
+---
+
+\subsection{Global Conservation of Linear Momentum}
+
+Applying the Reynolds Transport Theorem (RTT):
+\[
+\frac{d}{dt}\int_{D_t} \rho \mathbf{v}\, dV 
+= \int_{D_t} \frac{\partial (\rho \mathbf{v})}{\partial t}\, dV
++ \int_{\partial D_t} \rho \mathbf{v}\, (\mathbf{v}\cdot \mathbf{n})\, dS
+\]
+
+Substituting Cauchy’s relation $\mathbf{T} = \boldsymbol{\sigma} \mathbf{n}$ gives
+\[
+\int_{D_t} \frac{\partial (\rho \mathbf{v})}{\partial t}\, dV
++ \int_{\partial D_t} \rho \mathbf{v}\, (\mathbf{v}\cdot \mathbf{n})\, dS
+= \int_{\partial D_t} \boldsymbol{\sigma}\mathbf{n}\, dS + \int_{D_t} \rho \mathbf{b}\, dV
+\]
+
+---
+
+\subsubsection{Divergence Theorem and Localization}
+
+Using $\int_{\partial D_t} \boldsymbol{\sigma}\mathbf{n}\, dS = \int_{D_t} \nabla \cdot \boldsymbol{\sigma}\, dV$
+and localizing (since this holds for any $D_t$):
+\[
+\boxed{
+\rho\, \dot{\mathbf{v}} = \nabla \cdot \boldsymbol{\sigma} + \rho\, \mathbf{b}
+}
+\]
+This is the \textbf{local form of the balance of linear momentum} (Cauchy’s first law of motion).
+
+---
+
+\subsubsection{Quasi-static Motion}
+
+If accelerations are negligible ($\dot{\mathbf{v}} \approx 0$):
+\[
+\nabla \cdot \boldsymbol{\sigma} + \rho\, \mathbf{b} = 0
+\]
+This is the \textbf{equilibrium equation} used in statics.
+
+---
+
+\subsubsection{Global Conservation of Angular Momentum}
+
+The balance of moments gives:
+\[
+\frac{d}{dt}\int_{D_t} \rho\, \mathbf{x} \times \mathbf{v}\, dV
+= \int_{D_t} \rho\, \mathbf{x} \times \mathbf{b}\, dV 
++ \int_{\partial D_t} \mathbf{x} \times (\boldsymbol{\sigma}\mathbf{n})\, dS
+\]
+
+Applying the divergence theorem:
+\[
+\int_{D_t} \mathbf{x} \times (\nabla \cdot \boldsymbol{\sigma})\, dV
++ \int_{D_t} \boldsymbol{\sigma}^{T} : \nabla \mathbf{x}\, dV
+= \int_{D_t} \rho\, \mathbf{x} \times \mathbf{b}\, dV
+\]
+
+Localizing leads to:
+\[
+\mathbf{x} \times (\nabla \cdot \boldsymbol{\sigma}) + \text{skew}(\boldsymbol{\sigma}) = 0
+\]
+which implies that the stress tensor is symmetric:
+\[
+\boxed{
+\boldsymbol{\sigma} = \boldsymbol{\sigma}^{T}
+}
+\]
+
+---
+
+\subsubsection{Summary of Balance Laws}
+
+\begin{align*}
+\textbf{Mass:} \quad & \dot{\rho} + \rho\, \nabla \cdot \mathbf{v} = 0 \\
+\textbf{Linear Momentum:} \quad & \rho\, \dot{\mathbf{v}} = \nabla \cdot \boldsymbol{\sigma} + \rho\, \mathbf{b} \\
+\textbf{Angular Momentum:} \quad & \boldsymbol{\sigma} = \boldsymbol{\sigma}^{T}
+\end{align*}
+
+---
+
+\subsubsection{Interpretation}
+
+- $\nabla \cdot \boldsymbol{\sigma}$ : internal (surface) forces per unit volume  
+- $\rho\, \mathbf{b}$ : external body forces per unit volume  
+- $\rho\, \dot{\mathbf{v}}$ : inertial forces per unit volume  
+
+\textbf{In static equilibrium:}
+\[
+\nabla \cdot \boldsymbol{\sigma} + \rho\, \mathbf{b} = 0
+\]
+
+\textbf{In dynamic motion:}
+\[
+\nabla \cdot \boldsymbol{\sigma} + \rho\, \mathbf{b} = \rho\, \dot{\mathbf{v}}
+\]
+
+\subsection{Principal and Shear Stresses}
+
+---
+
+\subsubsection{Example: Bending Stress}
+For a beam in pure bending, the stress distribution is given by
+\[
+\sigma = \frac{M x_2}{I}
+\]
+and the stress tensor can be represented as
+\[
+\boldsymbol{\sigma} =
+\begin{bmatrix}
+\sigma_{11} & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+where $M$ is the bending moment and $I$ is the moment of inertia.
+
+---
+
+\subsubsection{Traction and Normal Stress}
+
+The traction vector on a plane with unit normal $\mathbf{n}$ is
+\[
+\mathbf{T} = \boldsymbol{\sigma} \mathbf{n}
+\]
+The \textbf{normal stress} acting on this plane is
+\[
+\sigma_n = \mathbf{n} \cdot \boldsymbol{\sigma} \mathbf{n}
+\]
+
+The normal stress $\sigma_n$ varies with the orientation $\mathbf{n}$.
+To find the \textbf{principal stresses}, we seek orientations for which $\mathbf{T}$ is parallel to $\mathbf{n}$, i.e.,
+\[
+\mathbf{T} = \sigma_n \mathbf{n}
+\]
+This implies
+\[
+\boldsymbol{\sigma} \mathbf{n} = \sigma_n \mathbf{n}
+\]
+which is an eigenvalue problem.
+
+Hence, the \textbf{principal stresses} $\sigma_1, \sigma_2, \sigma_3$ are the eigenvalues of $\boldsymbol{\sigma}$,
+and the corresponding \textbf{principal directions} $\mathbf{n}_1, \mathbf{n}_2, \mathbf{n}_3$
+are the eigenvectors.
+
+\[
+\text{min } \sigma_1 \leq \sigma_2 \leq \text{max } \sigma_3
+\]
+
+---
+
+\subsubsection{Equilibrium Equations}
+
+From the local balance of linear momentum:
+\[
+\sigma_{ij,j} + b_i = 0
+\]
+In component form:
+\[
+\begin{aligned}
+\sigma_{11,1} + \sigma_{12,2} + \sigma_{13,3} + b_1 &= 0, \\
+\sigma_{21,1} + \sigma_{22,2} + \sigma_{23,3} + b_2 &= 0, \\
+\sigma_{31,1} + \sigma_{32,2} + \sigma_{33,3} + b_3 &= 0
+\end{aligned}
+\]
+
+---
+
+\subsubsection{Stress Decomposition}
+
+Any stress tensor can be decomposed into its deviatoric and hydrostatic parts:
+\[
+\boldsymbol{\sigma} = \boldsymbol{\sigma}' + \frac{1}{3}(\text{tr}\,\boldsymbol{\sigma}) \mathbf{I}
+\]
+where  
+$\boldsymbol{\sigma}'$ : deviatoric (distortional) component (shear-related)  
+$\frac{1}{3}(\text{tr}\,\boldsymbol{\sigma}) \mathbf{I}$ : hydrostatic (volumetric) component.
+
+---
+
+\subsection{Maximum Shear Stress}
+
+Let $\sigma_1, \sigma_2, \sigma_3$ be the principal stresses, corresponding to principal directions $\mathbf{e}_1, \mathbf{e}_2, \mathbf{e}_3$.
+
+The shear stress on a plane with unit normal $\mathbf{n}$ is defined as
+\[
+\tau = \|\mathbf{T} - (\mathbf{T}\cdot \mathbf{n})\mathbf{n}\|
+\]
+where $\mathbf{T} = \boldsymbol{\sigma}\mathbf{n}$.
+
+Expanding:
+\[
+\tau^2 = \mathbf{T}\cdot\mathbf{T} - (\mathbf{T}\cdot\mathbf{n})^2
+\]
+
+Let $\boldsymbol{\sigma}$ be diagonal in the principal stress basis:
+\[
+\boldsymbol{\sigma} =
+\begin{bmatrix}
+\sigma_1 & 0 & 0 \\
+0 & \sigma_2 & 0 \\
+0 & 0 & \sigma_3
+\end{bmatrix}
+\]
+and $\mathbf{n} = [n_1, n_2, n_3]^T$.
+
+Then:
+\[
+\mathbf{T} = \boldsymbol{\sigma}\mathbf{n} =
+\begin{bmatrix}
+\sigma_1 n_1 \\
+\sigma_2 n_2 \\
+\sigma_3 n_3
+\end{bmatrix}
+\]
+\[
+\mathbf{T}\cdot\mathbf{T} = \sigma_1^2 n_1^2 + \sigma_2^2 n_2^2 + \sigma_3^2 n_3^2
+\]
+\[
+\mathbf{T}\cdot\mathbf{n} = \sigma_1 n_1^2 + \sigma_2 n_2^2 + \sigma_3 n_3^2
+\]
+
+Hence,
+\[
+\tau^2 = \sigma_1^2 n_1^2 + \sigma_2^2 n_2^2 + \sigma_3^2 n_3^2
+- (\sigma_1 n_1^2 + \sigma_2 n_2^2 + \sigma_3 n_3^2)^2
+\]
+
+To find the directions of maximum $\tau$, use Lagrange multipliers with the constraint $n_1^2 + n_2^2 + n_3^2 = 1$.
+Solving yields the maximum shear stresses:
+\[
+\boxed{
+\tau_{\max} =
+\frac{1}{2} \max\{|\sigma_1 - \sigma_2|,\, |\sigma_2 - \sigma_3|,\, |\sigma_3 - \sigma_1|\}
+}
+\]
+
+and the planes of maximum shear occur halfway between the principal directions (at $45^\circ$).
+
+\[
+\text{Example: } \tau_{\max} = \frac{1}{2}(\sigma_1 - \sigma_3)
+\]
+\[
+\mathbf{n} = \frac{1}{\sqrt{2}}(\mathbf{e}_1 \pm \mathbf{e}_3)
+\]
+
+---
+
+
+
+---
+
+\subsubsection{Summary}
+
+\begin{align*}
+\text{Traction vector:} & \quad \mathbf{T} = \boldsymbol{\sigma}\mathbf{n} \\
+\text{Normal stress:} & \quad \sigma_n = \mathbf{n}\cdot\boldsymbol{\sigma}\mathbf{n} \\
+\text{Principal stresses:} & \quad \boldsymbol{\sigma}\mathbf{n} = \sigma_n\mathbf{n} \\
+\text{Maximum shear:} & \quad \tau_{\max} = \frac{1}{2}(\sigma_1 - \sigma_3)
+\end{align*}
+
+\subsection{Alternative Stress Measures}
+
+---
+
+\subsubsection{Invariants of the Cauchy Stress Tensor}
+
+For any second-order tensor $\boldsymbol{\sigma}$, its principal invariants are:
+\[
+I_1 = \text{tr}(\boldsymbol{\sigma}) = \sigma_{kk}, \quad
+I_2 = \tfrac{1}{2}[(\text{tr}\,\boldsymbol{\sigma})^2 - \text{tr}(\boldsymbol{\sigma}^2)], \quad
+I_3 = \det(\boldsymbol{\sigma})
+\]
+These invariants remain unchanged under coordinate transformation and are often used in constitutive modeling.
+
+---
+
+\subsection{Cauchy and Nominal Stress}
+
+\[
+\sigma = \frac{F}{A} \quad \Rightarrow \quad \text{Cauchy stress (current configuration)}
+\]
+\[
+\sigma_{\text{nom}} = \frac{F}{A_0} \quad \Rightarrow \quad \text{Nominal stress (reference configuration)}
+\]
+
+Let:
+- $dS_0$ denote an infinitesimal area element in the reference configuration with normal $\mathbf{N}$,  
+- $dS$ denote the corresponding area element in the current configuration with normal $\mathbf{n}$.
+
+Then:
+\[
+d\mathbf{F} = \mathbf{T}^0\, dS_0 = \mathbf{T}\, dS
+\]
+where  
+$\mathbf{T}$ : traction in current configuration (Cauchy traction),  
+$\mathbf{T}^0$ : traction in reference configuration.
+
+The Cauchy stress $\boldsymbol{\sigma}$ is defined via the surface traction:
+\[
+d\mathbf{F} = \boldsymbol{\sigma}\mathbf{n}\, dS
+\]
+and represents force per unit \textit{current} area.
+
+---
+
+\subsection{First Piola–Kirchhoff (Nominal) Stress Tensor}
+
+We now seek a tensor $\mathbf{P}$ (or $\mathbf{T}^0$) that relates traction to the unit area in the \textit{reference} configuration:
+\[
+d\mathbf{F} = \mathbf{T}^0\, dS_0, \qquad 
+\mathbf{T}^0 = \mathbf{P}\, \mathbf{N}
+\]
+
+The local balance of linear momentum in the current configuration is
+\[
+\text{div}\, \boldsymbol{\sigma} + \rho \mathbf{b} = \rho \dot{\mathbf{v}}
+\]
+Applying the divergence theorem and transforming to the reference configuration gives:
+\[
+\int_{V_0} \left( \frac{\partial P_{iK}}{\partial X_K} + \rho_0 b_i - \rho_0 \dot{v}_i \right) dV_0 = 0
+\]
+Since this holds for any material volume $V_0$, the localized form is:
+\[
+\boxed{
+\frac{\partial P_{iK}}{\partial X_K} + \rho_0 b_i = \rho_0 \dot{v}_i
+}
+\]
+
+The nominal stress $\mathbf{P}$ is related to the Cauchy stress by
+\[
+\boxed{
+\mathbf{P} = J\, \boldsymbol{\sigma}\, \mathbf{F}^{-T}
+}
+\]
+where $J = \det(\mathbf{F})$ and $\mathbf{F}$ is the deformation gradient.
+
+$\mathbf{P}$ is generally \textit{not symmetric}.
+
+---
+
+\subsubsection{Relation Between Area Elements}
+
+The mapping between $dS_0$ and $dS$ is given by:
+\[
+\mathbf{n}\, dS = J\, \mathbf{F}^{-T}\mathbf{N}\, dS_0
+\]
+or equivalently:
+\[
+dS = J\, |\mathbf{F}^{-T}\mathbf{N}|
+\]
+which follows from Nanson’s relation:
+\[
+\boxed{
+\mathbf{n}\, dS = J\, \mathbf{F}^{-T}\mathbf{N}\, dS_0
+}
+\]
+
+---
+
+\subsection{Second Piola–Kirchhoff Stress Tensor}
+
+To define a symmetric stress measure in the reference configuration, we introduce:
+\[
+\boxed{
+\mathbf{S} = \mathbf{F}^{-1}\mathbf{P}
+}
+\]
+Substituting the relation for $\mathbf{P}$:
+\[
+\mathbf{S} = J\, \mathbf{F}^{-1} \boldsymbol{\sigma} \mathbf{F}^{-T}
+\]
+$\mathbf{S}$ is called the \textbf{Second Piola–Kirchhoff (2PK) stress tensor}, and it is always symmetric because $\boldsymbol{\sigma}$ is symmetric.
+
+Thus:
+\[
+\boxed{
+\mathbf{S} = \mathbf{S}^T
+}
+\]
+
+---
+
+\subsubsection{Physical Meaning}
+
+- $\mathbf{P}$ (First Piola–Kirchhoff): maps forces in the current configuration to areas in the reference configuration (force per undeformed area).  
+- $\mathbf{S}$ (Second Piola–Kirchhoff): maps forces and areas both to the reference configuration (true tensor, symmetric).  
+- $\boldsymbol{\sigma}$ (Cauchy): maps both forces and areas in the current configuration (true physical stress).
+
+---
+
+\subsubsection{Transformation Summary}
+
+\[
+\boxed{
+\begin{aligned}
+\mathbf{P} &= J\, \boldsymbol{\sigma}\, \mathbf{F}^{-T} &\text{(First Piola–Kirchhoff stress)} \\
+\mathbf{S} &= \mathbf{F}^{-1}\mathbf{P} = J\, \mathbf{F}^{-1}\boldsymbol{\sigma}\mathbf{F}^{-T} &\text{(Second Piola–Kirchhoff stress)} \\
+\boldsymbol{\sigma} &= \frac{1}{J}\, \mathbf{F}\, \mathbf{S}\, \mathbf{F}^T &\text{(Cauchy stress in terms of 2PK)}
+\end{aligned}
+}
+\]
+
+---
+
+\subsubsection{Notes}
+- $\mathbf{P}$ and $\mathbf{S}$ are defined in the reference (material) configuration.  
+- $\boldsymbol{\sigma}$ is defined in the current (spatial) configuration.  
+- For small deformations: $\mathbf{F} \approx \mathbf{I}$, $J \approx 1$, hence $\mathbf{S} \approx \boldsymbol{\sigma}$.
+
+---
+
+
+\textbf{Diagram Legend:}
+- $\mathbf{T}$ : traction vector in current configuration  
+- $\mathbf{T}^0$ : traction vector in reference configuration  
+- $d\mathbf{F}$ : differential force  
+- $dS$, $dS_0$ : area elements  
+- $\mathbf{F}$ : deformation gradient  
+- $J = \det(\mathbf{F})$
+
+\subsection{Energy Balance and Stress–Strain Power Conjugacy}
+
+---
+
+\subsubsection{Physical Meaning of Stress Transformations}
+
+Recall:
+\[
+d\mathbf{F} = \boldsymbol{\sigma}\, \mathbf{n}\, dS = \mathbf{T}\, dS
+\]
+
+To map $d\mathbf{F}$ back to the reference configuration, we use $\mathbf{F}^{-T}$:
+\[
+d\mathbf{F} = \mathbf{F}\, \mathbf{N}\, dS_0
+\]
+
+Define a traction vector in the reference configuration:
+\[
+\mathbf{T}^0 = \mathbf{S}\, \mathbf{N}
+\]
+where $\mathbf{S}$ is the \textbf{Second Piola–Kirchhoff stress tensor}.
+
+Then:
+\[
+\boxed{
+\mathbf{S} = J\, \mathbf{F}^{-1} \boldsymbol{\sigma} \mathbf{F}^{-T}
+}
+\]
+and the local equilibrium equation in the reference configuration is:
+\[
+\frac{\partial (S_{iK}F_{jK})}{\partial X_j} + \rho_0 b_i = \rho_0 a_i
+\]
+All three equilibrium forms (Cauchy, 1st PK, 2nd PK) are equivalent:
+\[
+\nabla_x \cdot \boldsymbol{\sigma} + \rho \mathbf{b} = \rho \dot{\mathbf{v}}
+\quad \Leftrightarrow \quad
+\nabla_X \cdot \mathbf{P} + \rho_0 \mathbf{b} = \rho_0 \dot{\mathbf{v}}
+\quad \Leftrightarrow \quad
+\nabla_X \cdot (\mathbf{S}\mathbf{F}^T) + \rho_0 \mathbf{b} = \rho_0 \dot{\mathbf{v}}
+\]
+
+---
+
+\subsection{Rate of Work and Energy Balance}
+
+The differential work done by internal and external forces is:
+\[
+\delta W = \boldsymbol{\sigma} : \delta \mathbf{d}
+\]
+The rate of work is the \textbf{power}:
+\[
+\mathcal{P} = \frac{dW}{dt} = \boldsymbol{\sigma} : \mathbf{D} = \sigma_{ij} D_{ij}
+\]
+where $\mathbf{D}$ is the rate-of-deformation tensor.
+
+---
+
+\subsubsection{Global Form}
+
+For a material volume $V(t)$ with surface $S(t)$:
+\[
+\frac{d}{dt}\int_{V(t)} \frac{1}{2}\rho v_i v_i\, dV
+= \int_{S(t)} T_i v_i\, dS + \int_{V(t)} \rho b_i v_i\, dV
+\]
+Substituting $T_i = \sigma_{ij} n_j$ and using the divergence theorem:
+\[
+\int_{V(t)} \sigma_{ij,j} v_i\, dV + \int_{V(t)} \sigma_{ij} v_{i,j}\, dV
++ \int_{V(t)} \rho b_i v_i\, dV = \int_{V(t)} \rho a_i v_i\, dV
+\]
+Using the balance of linear momentum $\sigma_{ij,j} + \rho b_i = \rho a_i$:
+\[
+\boxed{
+\int_{V(t)} \sigma_{ij} v_{i,j}\, dV = 0
+}
+\]
+which shows that only the symmetric part of the velocity gradient contributes to internal work.
+
+---
+
+\subsubsection{Velocity Gradient Decomposition}
+
+Define the velocity gradient:
+\[
+\mathbf{L} = \nabla \mathbf{v}, \qquad L_{ij} = \frac{\partial v_i}{\partial x_j}
+\]
+
+Decompose $\mathbf{L}$ into symmetric and antisymmetric parts:
+\[
+\boxed{
+\mathbf{L} = \mathbf{D} + \boldsymbol{\Omega}
+}
+\]
+where
+\[
+\mathbf{D} = \frac{1}{2}(\mathbf{L} + \mathbf{L}^T), \quad
+\boldsymbol{\Omega} = \frac{1}{2}(\mathbf{L} - \mathbf{L}^T)
+\]
+
+- $\mathbf{D}$ : \textbf{rate-of-deformation tensor} (symmetric)  
+  → measures strain rate  
+- $\boldsymbol{\Omega}$ : \textbf{spin tensor} (antisymmetric)  
+  → measures rigid-body rotation rate
+
+Since $\boldsymbol{\Omega}$ does no work:
+\[
+\boldsymbol{\sigma} : \boldsymbol{\Omega} = 0
+\]
+Thus, the stress power per unit volume is:
+\[
+\boxed{
+\dot{w}_{\text{int}} = \boldsymbol{\sigma} : \mathbf{D}
+}
+\]
+
+---
+
+\subsection{Stress Power and Conjugate Strain Measures}
+
+\begin{table}[h!]
+  \centering
+  \renewcommand{\arraystretch}{1.2}
+  \setlength{\tabcolsep}{10pt}
+  \begin{tabular}{c c c}
+  \toprule
+  \textbf{Stress Measure} & \textbf{Conjugate Strain Measure} & \textbf{Power per Reference Volume} \\
+  \midrule
+  $\boldsymbol{\sigma}$ (Cauchy) & $\mathbf{D}$ & $\boldsymbol{\sigma} : \mathbf{D}$ \\
+  $\mathbf{P}$ (1st PK) & $\dot{\mathbf{F}}$ & $\mathbf{P} : \dot{\mathbf{F}}$ \\
+  $\mathbf{S}$ (2nd PK) & $\dot{\mathbf{E}}$ & $\mathbf{S} : \dot{\mathbf{E}}$ \\
+  \bottomrule
+  \end{tabular}
+  \caption{Stress and conjugate strain measures with their corresponding power per reference volume.}
+  \label{tab:stress_measures}
+  \end{table}
+Here $\mathbf{E}$ is the Green–Lagrange strain tensor:
+\[
+\mathbf{E} = \tfrac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I})
+\]
+and its material rate is:
+\[
+\dot{\mathbf{E}} = \mathbf{F}^T \mathbf{D} \mathbf{F}
+\]
+
+Thus, the energy equivalence between configurations is:
+\[
+\boxed{
+\boldsymbol{\sigma} : \mathbf{D} = \frac{1}{J}\, \mathbf{P} : \dot{\mathbf{F}} = \frac{1}{J}\, \mathbf{S} : \dot{\mathbf{E}}
+}
+\]
+
+---
+
+\subsubsection{Summary of Energy Relations}
+
+\begin{align*}
+\text{Power input:} &\quad \dot{W} = \int_{V(t)} \boldsymbol{\sigma} : \mathbf{D}\, dV \\
+\text{Stress power density:} &\quad p = \boldsymbol{\sigma} : \mathbf{D} \\
+\text{Total rate of work (current volume):} &\quad P = \int_V \boldsymbol{\sigma} : \mathbf{D}\, dV \\
+\text{Total rate of work (reference volume):} &\quad P_0 = \int_{V_0} \mathbf{S} : \dot{\mathbf{E}}\, dV_0
+\end{align*}
+
+---
+
+\subsubsection{Interpretation}
+- $\boldsymbol{\sigma} : \mathbf{D}$ represents the **instantaneous mechanical power density** in the current configuration.  
+- Only $\mathbf{D}$ contributes to deformation work; $\boldsymbol{\Omega}$ corresponds to pure rotation.  
+- The equality $\boldsymbol{\sigma} : \mathbf{D} = \frac{1}{J}\mathbf{S} : \dot{\mathbf{E}}$ ensures energetic consistency across all configurations.
+
+---
+
+---
+
+\subsubsection{Compact Summary}
+
+\[
+\boxed{
+\begin{aligned}
+\text{Velocity Gradient:} &\quad \mathbf{L} = \nabla \mathbf{v} \\
+\text{Rate of Deformation:} &\quad \mathbf{D} = \tfrac{1}{2}(\mathbf{L} + \mathbf{L}^T) \\
+\text{Spin Tensor:} &\quad \boldsymbol{\Omega} = \tfrac{1}{2}(\mathbf{L} - \mathbf{L}^T) \\
+\text{Stress Power:} &\quad \boldsymbol{\sigma} : \mathbf{D} = \frac{1}{J}\, \mathbf{S} : \dot{\mathbf{E}}
+\end{aligned}
+}
+\]
+
+\subsection{Rate of Deformation and Work Conjugacy}
+
+---
+
+\subsubsection{Kinematics: Time Rate of Deformation Gradient}
+
+\[
+F_{ij} = \frac{\partial x_i}{\partial X_j}
+\]
+Taking its material time derivative:
+\[
+\dot{F}_{ij} = \frac{d}{dt}\left(\frac{\partial x_i}{\partial X_j}\right)
+= \frac{\partial \dot{x}_i}{\partial X_j}
+= \frac{\partial v_i}{\partial X_j}
+\]
+Using the chain rule:
+\[
+\frac{\partial v_i}{\partial X_j} = \frac{\partial v_i}{\partial x_k}\frac{\partial x_k}{\partial X_j}
+\]
+Thus:
+\[
+\boxed{
+\dot{\mathbf{F}} = \mathbf{L}\, \mathbf{F}
+\quad \text{where } \mathbf{L} = \nabla_x \mathbf{v}
+}
+\]
+
+---
+
+\subsubsection{Stress Power in Different Configurations}
+
+From the previous section:
+\[
+P_0 = J\, \boldsymbol{\sigma} : \mathbf{D}
+\]
+and since $\mathbf{P} = J \boldsymbol{\sigma} \mathbf{F}^{-T}$,
+\[
+P_0 = \mathbf{P} : \dot{\mathbf{F}}
+\]
+
+Similarly, since $\mathbf{S} = \mathbf{F}^{-1}\mathbf{P}$,
+\[
+\boxed{
+P_0 = \mathbf{S} : \dot{\mathbf{E}}
+}
+\]
+where $\mathbf{E}$ is the Green–Lagrange strain tensor.
+
+Therefore, $\boldsymbol{\sigma}$ is the \textbf{work-rate conjugate} of the rate of deformation $\mathbf{D}$, and $\mathbf{S}$ is the conjugate of $\dot{\mathbf{E}}$.
+
+\[
+\boldsymbol{\sigma} : \mathbf{D} = \frac{1}{J}\mathbf{S} : \dot{\mathbf{E}}
+\]
+
+---
+
+\subsubsection{Green–Lagrange Strain and its Rate}
+
+\[
+\mathbf{E} = \frac{1}{2}(\mathbf{F}^T\mathbf{F} - \mathbf{I})
+\]
+Taking its rate:
+\[
+\dot{\mathbf{E}} = \frac{1}{2}(\dot{\mathbf{F}}^T\mathbf{F} + \mathbf{F}^T\dot{\mathbf{F}})
+= \text{sym}(\mathbf{F}^T\dot{\mathbf{F}})
+= \text{sym}(\mathbf{F}^T\mathbf{L}\mathbf{F})
+\]
+
+Hence, the work conjugacy condition becomes:
+\[
+P_0 = \text{tr}(\mathbf{S}\dot{\mathbf{E}})
+\]
+
+---
+
+\subsection{Mean Stress Theorem}
+
+---
+
+The mean (or average) stress tensor over a volume $V$ is defined as:
+\[
+\bar{\sigma}_{ij} = \frac{1}{V}\int_V \sigma_{ij}\, dV
+\]
+
+Starting from the equilibrium condition:
+\[
+\int_S T_i x_j\, dS + \int_V b_i x_j\, dV
+= \int_V \sigma_{ij}\, dV
+\]
+Substitute $T_i = \sigma_{ik}n_k$ and apply the divergence theorem:
+\[
+\int_V (\sigma_{ij,j} + b_i)x_j\, dV + \int_V \sigma_{ij}\, dV = 0
+\]
+Using equilibrium ($\sigma_{ij,j} + b_i = 0$):
+\[
+\boxed{
+\bar{\sigma}_{ij} = \frac{1}{V}\int_V \sigma_{ij}\, dV
+}
+\]
+which verifies that the mean stress equals the volume average of the stress field.
+
+---
+
+\subsection{Linear Elasticity: Hooke’s Law}
+
+---
+
+Assume small deformations and isotropy:
+\[
+\varepsilon_{ij} = \frac{1+\nu}{E}\sigma_{ij} - \frac{\nu}{E}\sigma_{kk}\delta_{ij}
+\]
+This is the general form of \textbf{Hooke’s law}.
+
+For uniaxial stress $\sigma = \sigma_{11}$:
+\[
+\varepsilon_{11} = \frac{\sigma}{E}, \qquad
+\varepsilon_{22} = \varepsilon_{33} = -\nu\frac{\sigma}{E}
+\]
+
+The volumetric strain is:
+\[
+\varepsilon_v = \varepsilon_{11} + \varepsilon_{22} + \varepsilon_{33}
+= \frac{\sigma}{E}(1 - 2\nu)
+\]
+
+---
+
+\subsection{Axial Compression Example}
+
+Consider a cylindrical specimen compressed by an axial load $P$ (no friction):
+\[
+\sigma_z = \frac{P}{A} = \frac{P}{\pi r^2}
+\]
+Axial and radial strains:
+\[
+\varepsilon_z = \frac{\sigma_z}{E}, \quad
+\varepsilon_r = \varepsilon_\theta = -\nu \frac{\sigma_z}{E}
+\]
+The volume change is:
+\[
+\frac{\Delta V}{V} = \varepsilon_v = (1 - 2\nu)\frac{\sigma_z}{E}
+\]
+If end friction exists (so lateral strain is restricted), the axial stress distribution becomes nonuniform, with shear stresses developing at the contact interface.
+
+The external work done is:
+\[
+\Delta V = \frac{1-2\nu}{E} \int_S (p\, \mathbf{n}\cdot\mathbf{x})\, dS
+\approx \frac{1-2\nu}{E} P h
+\]
+for uniform pressure $p$ over cross-section $A$.
+
+---
+
+\subsection{Summary Table}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Concept} & \textbf{Expression} & \textbf{Interpretation} \\
+\midrule
+$\mathbf{L}$ & $\displaystyle \nabla_x \mathbf{v}$ & Velocity gradient \\[4pt]
+$\mathbf{D}$ & $\displaystyle \tfrac{1}{2}(\mathbf{L} + \mathbf{L}^T)$ & Rate of deformation tensor \\[4pt]
+$\boldsymbol{\Omega}$ & $\displaystyle \tfrac{1}{2}(\mathbf{L} - \mathbf{L}^T)$ & Spin (rigid-body rotation) \\[4pt]
+$\dot{\mathbf{E}}$ & $\displaystyle \text{sym}(\mathbf{F}^T \dot{\mathbf{F}})$ & Green strain rate \\[4pt]
+$\boldsymbol{\sigma} : \mathbf{D}$ & Instantaneous power density & Work rate per current volume \\[4pt]
+$\mathbf{S} : \dot{\mathbf{E}}$ & Material power density & Work rate per reference volume \\[4pt]
+$\displaystyle \varepsilon_{ij} = \frac{1+\nu}{E}\sigma_{ij} - \frac{\nu}{E}\sigma_{kk}\delta_{ij}$ & Hooke’s law & Linear elastic isotropy \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\subsection{Energy Balance for Elastic Solids}
+
+---
+
+\subsubsection{Energy Rate Balance (Current Configuration)}
+
+The external power acting on a material volume $V(t)$ is:
+\[
+P_{\text{ext}} = \int_{\partial V} \mathbf{T} \cdot \mathbf{v}\, dS + \int_V \rho \mathbf{b} \cdot \mathbf{v}\, dV
+\]
+Applying the divergence theorem and using $\mathbf{T} = \boldsymbol{\sigma}\mathbf{n}$:
+\[
+P_{\text{ext}} = \int_V \nabla \cdot (\boldsymbol{\sigma}\mathbf{v})\, dV + \int_V \rho \mathbf{b} \cdot \mathbf{v}\, dV
+\]
+\[
+P_{\text{ext}} = \int_V \boldsymbol{\sigma} : \nabla \mathbf{v}\, dV + \int_V (\nabla \cdot \boldsymbol{\sigma} + \rho \mathbf{b}) \cdot \mathbf{v}\, dV
+\]
+Using momentum balance $\nabla \cdot \boldsymbol{\sigma} + \rho \mathbf{b} = \rho \dot{\mathbf{v}}$:
+\[
+\boxed{
+P_{\text{ext}} = \int_V \boldsymbol{\sigma} : \mathbf{D}\, dV + \int_V \rho \dot{\mathbf{v}} \cdot \mathbf{v}\, dV
+}
+\]
+
+The rate of change of total energy per current unit volume is:
+\[
+\frac{d}{dt}\int_V \left( \frac{1}{2}\rho \mathbf{v}\cdot\mathbf{v} + \rho e \right) dV = P_{\text{ext}}
+\]
+where $e$ is the internal energy per unit mass.  
+Thus, $\boldsymbol{\sigma}:\mathbf{D}$ is the **stress working rate per current unit volume**.
+
+---
+
+\subsubsection{Energy Rate Balance (Reference Configuration)}
+
+Rewriting in the material configuration:
+\[
+P_{\text{ext}} = \int_{\partial V_0} \mathbf{T}^0 \cdot \mathbf{v}\, dS_0 + \int_{V_0} \rho_0 \mathbf{b}^0 \cdot \mathbf{v}\, dV_0
+\]
+Apply divergence theorem in the reference frame:
+\[
+P_{\text{ext}} = \int_{V_0} \mathbf{P} : \nabla_X \mathbf{v}\, dV_0 + \int_{V_0} (\nabla_X \cdot \mathbf{P} + \rho_0 \mathbf{b}^0) \cdot \mathbf{v}\, dV_0
+\]
+Using equilibrium $\nabla_X \cdot \mathbf{P} + \rho_0 \mathbf{b}^0 = \rho_0 \dot{\mathbf{v}}$:
+\[
+\boxed{
+P_{\text{ext}} = \int_{V_0} \mathbf{P} : \dot{\mathbf{F}}\, dV_0 + \int_{V_0} \rho_0 \dot{\mathbf{v}} \cdot \mathbf{v}\, dV_0
+}
+\]
+Thus, $\mathbf{P}:\dot{\mathbf{F}}$ is the **work rate conjugate in the reference configuration**.
+
+---
+
+\subsection{Strain Energy and Elastic Solids}
+
+For elastic materials, the stress power is stored as recoverable strain energy per unit reference volume $w(\mathbf{E})$:
+\[
+\dot{w} = \mathbf{S} : \dot{\mathbf{E}}
+\]
+Integrating over time:
+\[
+w(\mathbf{E}) = \int_0^t \mathbf{S} : \dot{\mathbf{E}}\, dt
+\]
+Hence, for a hyperelastic (Green elastic) material,
+\[
+\boxed{
+\mathbf{S} = \frac{\partial w}{\partial \mathbf{E}}
+}
+\]
+and equivalently in the current configuration,
+\[
+\boldsymbol{\sigma} = \frac{1}{J} \mathbf{F} \frac{\partial w}{\partial \mathbf{E}} \mathbf{F}^T
+\]
+
+---
+
+\subsection{Total Energy and Conservation}
+
+The total energy of the body is:
+\[
+E(t) = K(t) + U(t)
+\]
+where
+\[
+K(t) = \int_V \frac{1}{2}\rho \mathbf{v}\cdot\mathbf{v}\, dV, \quad U(t) = \int_{V_0} w(\mathbf{E})\, dV_0
+\]
+If the body is at rest and unloaded at $t = 0$,
+\[
+\boxed{
+E(t) = K(t) + U(t) = \text{constant}
+}
+\]
+This expresses the **conservation of mechanical energy** in an elastic solid.
+
+---
+
+\subsection{Nonlinear Elastic Solids}
+
+For general nonlinear elastic materials:
+\[
+\mathbf{P} = \frac{\partial w}{\partial \mathbf{F}}
+\]
+and
+\[
+\boxed{
+\mathbf{S} = 2\,\frac{\partial w}{\partial \mathbf{C}}
+\quad \text{where } \mathbf{C} = \mathbf{F}^T\mathbf{F}
+}
+\]
+
+The power conjugate relationships remain:
+\[
+\mathbf{P} : \dot{\mathbf{F}} = \mathbf{S} : \dot{\mathbf{E}} = \boldsymbol{\sigma} : \mathbf{D}
+\]
+
+---
+
+\subsection{Governing Equations of Nonlinear Elasticity}
+
+Let $\mathbf{x} = \mathbf{x}(\mathbf{X}, t)$ and $\mathbf{u} = \mathbf{x} - \mathbf{X}$.
+
+Then:
+\[
+\begin{aligned}
+\text{Kinematics:} & \quad \mathbf{F} = \frac{\partial \mathbf{x}}{\partial \mathbf{X}} \\
+\text{Strain:} & \quad \mathbf{E} = \frac{1}{2}(\mathbf{F}^T\mathbf{F} - \mathbf{I}) \\
+\text{Constitutive:} & \quad \mathbf{S} = \mathbf{S}(\mathbf{E}) = \frac{\partial w}{\partial \mathbf{E}} \\
+\text{Equilibrium:} & \quad \nabla_X \cdot \mathbf{S} + \rho_0 \mathbf{b} = 0
+\end{aligned}
+\]
+
+Hence, the nonlinear elasticity problem involves:
+\[
+\boxed{
+\text{Unknowns: } 3 \text{ displacements},\ 6 \text{ strains},\ 6 \text{ stresses} \quad \Rightarrow 15 \text{ total equations}
+}
+\]
+
+---
+
+\subsection{Summary of Hyperelasticity}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Variable} & \textbf{Definition} & \textbf{Role} \\
+\midrule
+$\mathbf{F}$ & $\displaystyle \frac{\partial \mathbf{x}}{\partial \mathbf{X}}$ & Deformation gradient \\[4pt]
+$\mathbf{E}$ & $\displaystyle \tfrac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I})$ & Green–Lagrange strain \\[4pt]
+$\mathbf{S}$ & $\displaystyle 2\,\frac{\partial w}{\partial \mathbf{C}}$ & 2nd Piola–Kirchhoff stress \\[4pt]
+$\mathbf{P}$ & $\displaystyle \frac{\partial w}{\partial \mathbf{F}}$ & 1st Piola–Kirchhoff stress \\[4pt]
+$\boldsymbol{\sigma}$ & $\displaystyle \frac{1}{J}\,\mathbf{F}\mathbf{S}\mathbf{F}^T$ & Cauchy stress \\[4pt]
+$w(\mathbf{E})$ & Strain energy density & Constitutive potential \\[4pt]
+$\mathbf{S}:\dot{\mathbf{E}}$ & Stress power per reference volume & Energetic conjugate pair \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+
+
+
+\subsection{Nonlinear Elastic Solids and Hyperelasticity}
+
+---
+
+\subsubsection{Definition of Hyperelasticity}
+
+For a hyperelastic solid, the stress derives from a scalar potential—the strain energy density \( W \):
+\[
+\boxed{
+t_{ij} F_{ij} = \frac{dW}{dt}
+}
+\]
+Since this must hold for arbitrary rates \( \dot{F}_{ij} \), we have
+\[
+\boxed{
+t_{ij} = \frac{\partial W}{\partial F_{ij}}
+}
+\]
+This means that the stress is derived directly from the energy function.
+
+---
+
+\subsubsection{Frame Indifference (Objectivity)}
+
+The strain energy density \( W \) must not change if a **rigid body motion** is superposed on a deformation:
+\[
+W(\mathbf{F}) = W(\mathbf{QF})
+\quad \forall \text{ proper orthogonal } \mathbf{Q}, \text{ where } \mathbf{Q}^T\mathbf{Q} = \mathbf{I}, \ \det\mathbf{Q}=+1
+\]
+
+---
+
+\subsection{Material Frame Indifference}
+
+Consider the motion
+\[
+\mathbf{x} = \mathbf{x}(\mathbf{X},t)
+\quad \text{with deformation gradient} \quad
+\mathbf{F} = \frac{\partial \mathbf{x}}{\partial \mathbf{X}}.
+\]
+Let the stress and strain energy density depend on \(\mathbf{F}\):
+\[
+\mathbf{t} = \mathbf{t}(\mathbf{F}), \quad W = W(\mathbf{F}).
+\]
+Now, consider an equivalent motion obtained by superposing a rigid rotation:
+\[
+\tilde{\mathbf{x}} = \mathbf{Q}(t)\mathbf{x} + \mathbf{c}(t),
+\]
+where \(\mathbf{Q}\) is an orthogonal rotation tensor.
+
+Then:
+\[
+\tilde{\mathbf{F}} = \frac{\partial \tilde{\mathbf{x}}}{\partial \mathbf{X}} = \mathbf{QF}.
+\]
+Objectivity requires that both motions be described by the same energy function:
+\[
+\boxed{
+W(\mathbf{F}) = W(\mathbf{QF}) \quad \forall \mathbf{Q}
+}
+\]
+
+---
+
+\subsection{Consequence: Dependence on \(\mathbf{C} = \mathbf{F}^T\mathbf{F}\)}
+
+Consider the polar decomposition:
+\[
+\mathbf{F} = \mathbf{R}\mathbf{U},
+\]
+where \(\mathbf{R}\) is a rotation tensor (\(\mathbf{R}^T\mathbf{R} = \mathbf{I}\)) and \(\mathbf{U}\) is the right stretch tensor.
+
+Since \(W\) is invariant under superposed rigid rotations:
+\[
+W(\mathbf{F}) = W(\mathbf{R}\mathbf{U}) = W(\mathbf{U})
+\]
+Thus, \(W\) can depend only on symmetric measures of strain. Because \(\mathbf{C} = \mathbf{F}^T\mathbf{F} = \mathbf{U}^2\):
+\[
+\boxed{
+W = W(\mathbf{C})
+}
+\]
+
+---
+
+\subsection{Derivation of Stress from \(W(\mathbf{C})\)}
+
+We have:
+\[
+t_{ij} = \frac{\partial W}{\partial F_{ij}}
+= \frac{\partial W}{\partial C_{pq}} \frac{\partial C_{pq}}{\partial F_{ij}}
+\]
+and since
+\[
+C_{pq} = F_{rp}F_{rq},
+\quad \frac{\partial C_{pq}}{\partial F_{ij}} = \delta_{pi}F_{jq} + F_{ip}\delta_{qj},
+\]
+we find:
+\[
+t_{ij} = 2 F_{ir} \frac{\partial W}{\partial C_{rj}}
+\]
+Therefore, defining the second Piola–Kirchhoff stress as:
+\[
+\boxed{
+S_{rj} = 2\frac{\partial W}{\partial C_{rj}},
+\quad \text{we obtain} \quad
+t = \frac{1}{J}\mathbf{F}\mathbf{S}\mathbf{F}^T.
+}
+\]
+
+---
+
+\subsection{Symmetry and Work Conjugacy}
+
+- \( \mathbf{S} \) is symmetric because \( \mathbf{C} \) is symmetric.  
+- The stress power per unit reference volume is:
+  \[
+  P_0 = \mathbf{S} : \dot{\mathbf{E}} = \frac{dW}{dt}
+  \]
+- Therefore, \( \mathbf{S} \) is work-conjugate to the Green–Lagrange strain \( \mathbf{E} \).
+
+---
+
+\subsection{Infinitesimal Limit}
+
+For small strains:
+\[
+\sigma_{ij} = \frac{\partial W}{\partial \varepsilon_{ij}}
+\]
+If \( W = \tfrac{1}{2}\sigma_{ij}\varepsilon_{ij} = \tfrac{1}{2}E\varepsilon^2 \),
+then:
+\[
+\boxed{
+\sigma = E\varepsilon
+}
+\]
+which recovers Hooke’s law in the infinitesimal limit.
+
+---
+
+\subsection{Summary of Objectivity and Hyperelastic Constitutive Law}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Concept} & \textbf{Tensor / Expression} & \textbf{Meaning} \\
+\midrule
+Objectivity & $\displaystyle W(\mathbf{F}) = W(\mathbf{QF})$ & Energy unchanged by rigid rotation \\[4pt]
+Consequence & $\displaystyle W = W(\mathbf{C})$ & Depends only on stretch invariants \\[4pt]
+2nd PK Stress & $\displaystyle \mathbf{S} = 2\,\frac{\partial W}{\partial \mathbf{C}}$ & Symmetric stress in reference frame \\[4pt]
+Cauchy Stress & $\displaystyle \boldsymbol{\sigma} = \frac{1}{J}\,\mathbf{F}\mathbf{S}\mathbf{F}^T$ & True stress in current frame \\[4pt]
+Conjugate Pair & $\displaystyle \mathbf{S} : \dot{\mathbf{E}} = \dot{W}$ & Work rate per reference volume \\[4pt]
+Small Strain Limit & $\displaystyle \sigma = E\,\varepsilon$ & Hooke’s law \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\subsection{The Effect of Material Symmetry}
+
+---
+
+\subsubsection{Concept}
+
+Let two configurations \( k \) and \( r \) exhibit the same material properties.  
+If a rotation \( \mathbf{Q} \) belongs to the \textbf{material symmetry group} of configuration \( k \),  
+then the material in configuration \( r \) must exhibit identical constitutive behavior as in \( k \), regardless of the reference configuration.
+
+This means that the constitutive function
+\[
+\mathbf{t} = \mathbf{f}(\mathbf{F})
+\]
+must satisfy
+\[
+\boxed{
+\mathbf{f}(\mathbf{FQ}) = \mathbf{f}(\mathbf{F})
+}
+\quad \text{or equivalently} \quad
+W(\mathbf{F}) = W(\mathbf{FQ})
+\]
+for all orthogonal \( \mathbf{Q} \in \mathcal{G} \), where \( \mathcal{G} \) is the material symmetry group.
+
+---
+
+\subsubsection{Orthogonal Members of the Symmetry Group}
+
+Since \( \mathbf{Q}^T\mathbf{Q} = \mathbf{I} \), we require that:
+\[
+W(\mathbf{F}) = W(\mathbf{FQ}) = W(\mathbf{QF})
+\]
+and for the right Cauchy–Green tensor \( \mathbf{C} = \mathbf{F}^T\mathbf{F} \),
+\[
+(\mathbf{FQ})^T(\mathbf{FQ}) = \mathbf{Q}^T \mathbf{C} \mathbf{Q}
+\]
+Thus,
+\[
+\boxed{
+W(\mathbf{C}) = W(\mathbf{Q}^T \mathbf{C} \mathbf{Q})
+}
+\]
+Material objectivity (frame indifference) and material symmetry together imply that  
+the strain energy must depend on \(\mathbf{C}\) through its invariants.
+
+---
+
+\subsection{Material Symmetry in the Infinitesimal Limit}
+
+For infinitesimal strains \(\boldsymbol{\varepsilon}\),
+\[
+W(\boldsymbol{\varepsilon}) = W(\mathbf{Q}^T \boldsymbol{\varepsilon} \mathbf{Q})
+\]
+The **linear elastic solid** is defined by a quadratic strain energy density:
+\[
+\boxed{
+W = \tfrac{1}{2} C_{ijkl}\, \varepsilon_{ij}\, \varepsilon_{kl}
+}
+\]
+where \(C_{ijkl}\) are the **elastic stiffness constants**.
+
+If \( \mathbf{Q} \) is a member of the material symmetry group, then so is \( \mathbf{Q}^T \),  
+and the strain energy satisfies:
+\[
+\boxed{
+W(\boldsymbol{\varepsilon}) = W(\mathbf{Q}\boldsymbol{\varepsilon}\mathbf{Q}^T)
+}
+\]
+
+---
+
+\subsection{Transformation of Elastic Constants}
+
+Let \(\{\mathbf{e}_i\}\) and \(\{\mathbf{e}'_i\}\) denote the unrotated and rotated bases.  
+If \(\mathbf{e}'_i = \mathbf{Q}\mathbf{e}_i\), then:
+\[
+\varepsilon'_{ij} = Q_{ip} Q_{jq} \varepsilon_{pq}
+\]
+and
+\[
+W(\boldsymbol{\varepsilon}') = W(\mathbf{Q}\boldsymbol{\varepsilon}\mathbf{Q}^T)
+\]
+
+For the linear hyperelastic solid:
+\[
+W(\boldsymbol{\varepsilon}) = \tfrac{1}{2} C_{ijkl}\, \varepsilon_{ij}\, \varepsilon_{kl}
+\]
+then
+\[
+W(\boldsymbol{\varepsilon}') = \tfrac{1}{2} C'_{pqmn}\, \varepsilon'_{pq}\, \varepsilon'_{mn}
+= \tfrac{1}{2} C_{ijkl}\, \varepsilon_{ij}\, \varepsilon_{kl}
+\]
+
+Substituting the transformations of strain:
+\[
+C_{pqmn}\, \varepsilon_{pq}\, \varepsilon_{mn}
+= Q_{pi}Q_{qj}Q_{mk}Q_{nl}\, C_{ijkl}\, \varepsilon_{pq}\, \varepsilon_{mn}
+\]
+and since this must hold for arbitrary strains:
+\[
+\boxed{
+C_{pqmn} = Q_{pi} Q_{qj} Q_{mk} Q_{nl}\, C_{ijkl}
+}
+\]
+Hence \( \mathbf{Q} \) is a **symmetry transformation** of the material if:
+\[
+\boxed{
+C_{pqmn} = C_{ijkl}
+}
+\]
+
+---
+
+\subsection{Symmetries of \(C_{ijkl}\)}
+
+Because \(W\) is a scalar quadratic form:
+\[
+W = \tfrac{1}{2} C_{ijkl}\, \varepsilon_{ij}\, \varepsilon_{kl}
+\]
+and since \(\varepsilon_{ij} = \varepsilon_{ji}\),  
+we may exchange indices without loss of generality.
+
+1. **Minor Symmetries:**
+   \[
+   C_{ijkl} = C_{jikl} = C_{ijlk}
+   \]
+   — symmetry with respect to interchanging the first or last pair of indices.
+
+2. **Major Symmetry:**
+   \[
+   C_{ijkl} = C_{klij}
+   \]
+   — implied by the existence of strain energy \(W\).
+
+Together, these symmetries reduce \(C_{ijkl}\) from 81 components to:
+\[
+\boxed{
+36\ \text{independent constants from minor symmetry, and 21 from major symmetry.}
+}
+\]
+
+---
+
+\subsection{Linear Hyperelastic Material}
+
+A linear hyperelastic (or linear elastic) material is one whose strain energy is quadratic in strain:
+\[
+W = \tfrac{1}{2} C_{ijkl}\, \varepsilon_{ij}\, \varepsilon_{kl},
+\quad
+\sigma_{ij} = \frac{\partial W}{\partial \varepsilon_{ij}} = C_{ijkl}\, \varepsilon_{kl}.
+\]
+This yields the **generalized Hooke’s law**:
+\[
+\boxed{
+\sigma_{ij} = C_{ijkl}\, \varepsilon_{kl}
+}
+\]
+The symmetry of stress and strain ensures that \(C_{ijkl} = C_{jikl} = C_{ijlk} = C_{klij}\),
+reducing the number of independent constants to 21.
+
+---
+
+\subsection{Summary Table}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Symmetry Type} & \textbf{Expression} & \textbf{Effect on Constants} \\
+\midrule
+Minor symmetry (stress/strain symmetry) & 
+$\displaystyle C_{ijkl} = C_{jikl} = C_{ijlk}$ & 
+$81 \rightarrow 36$ \\[4pt]
+Major symmetry (existence of $W$) & 
+$\displaystyle C_{ijkl} = C_{klij}$ & 
+$36 \rightarrow 21$ \\[4pt]
+Material symmetry (e.g.\ isotropy) & 
+$\displaystyle W(\mathbf{Q}\varepsilon\mathbf{Q}^T) = W(\varepsilon)$ & 
+Further reduces constants \\[4pt]
+Linear hyperelastic law & 
+$\displaystyle \sigma_{ij} = C_{ijkl}\,\varepsilon_{kl}$ & 
+Generalized Hooke’s law \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+% \subsection{Matrix Notation and Elastic Symmetry}
+
+% ---
+
+% \subsubsection{Matrix (Voigt) Notation}
+
+% Stress and strain tensors are written with a single index running from 1 to 6:
+% \[
+% \begin{array}{c|c}
+% \text{Tensor Components} & \text{Matrix Form (Voigt)} \\ \hline
+% \sigma_{11} = \sigma_1 & \varepsilon_{11} = \varepsilon_1 \\
+% \sigma_{22} = \sigma_2 & \varepsilon_{22} = \varepsilon_2 \\
+% \sigma_{33} = \sigma_3 & \varepsilon_{33} = \varepsilon_3 \\
+% \sigma_{23} = \sigma_4 & \varepsilon_{23} = \varepsilon_4 \\
+% \sigma_{31} = \sigma_5 & \varepsilon_{31} = \varepsilon_5 \\
+% \sigma_{12} = \sigma_6 & \varepsilon_{12} = \varepsilon_6
+% \end{array}
+% \]
+
+% The stress–strain relationship
+% \[
+% \sigma_{ij} = C_{ijkl}\,\varepsilon_{kl}
+% \]
+% becomes, in matrix form,
+% \[
+% \boxed{
+% \sigma_m = C_{mn}\, \varepsilon_n, \quad m,n = 1,\dots,6.
+% }
+% \]
+
+% In this notation, the pairs of tensor indices are replaced according to:
+% \[
+% (ij) = (11,22,33,23,31,12) \quad \Rightarrow \quad m = 1,2,3,4,5,6.
+% \]
+
+% For example:
+% \[
+% C_{1123} \;\to\; C_{14}, \qquad
+% C_{3311} \;\to\; C_{31} = C_{13}.
+% \]
+
+% Thus:
+% \[
+% \sigma_i = C_{ij}\varepsilon_j
+% \quad \text{or} \quad
+% \sigma_1 = C_{11}\varepsilon_1 + C_{12}\varepsilon_2 + \cdots
+% \]
+
+% ---
+
+% \subsubsection{Plane of Elastic Symmetry}
+
+% If the material has one plane of elastic symmetry (e.g. about the $x_3$-axis),  
+% the stiffness matrix takes the form:
+% \[
+% [C] =
+% \begin{bmatrix}
+% C_{11} & C_{12} & C_{13} & 0 & 0 & C_{16} \\
+% C_{12} & C_{22} & C_{23} & 0 & 0 & C_{26} \\
+% C_{13} & C_{23} & C_{33} & 0 & 0 & C_{36} \\
+% 0 & 0 & 0 & C_{44} & C_{45} & 0 \\
+% 0 & 0 & 0 & C_{45} & C_{55} & 0 \\
+% C_{16} & C_{26} & C_{36} & 0 & 0 & C_{66}
+% \end{bmatrix}
+% \]
+% This structure corresponds to **13 independent elastic constants.**
+
+% ---
+
+% \subsubsection{Orthotropic Symmetry}
+
+% For orthotropic materials — having **three orthogonal planes of symmetry** —  
+% the stiffness matrix reduces to:
+% \[
+% [C] =
+% \begin{bmatrix}
+% C_{11} & C_{12} & C_{13} & 0 & 0 & 0 \\
+% C_{12} & C_{22} & C_{23} & 0 & 0 & 0 \\
+% C_{13} & C_{23} & C_{33} & 0 & 0 & 0 \\
+% 0 & 0 & 0 & C_{44} & 0 & 0 \\
+% 0 & 0 & 0 & 0 & C_{55} & 0 \\
+% 0 & 0 & 0 & 0 & 0 & C_{66}
+% \end{bmatrix}
+% \]
+% This case has **9 independent elastic constants**  
+% (typical for wood, fiber composites, rolled metal sheets, etc.).
+
+% ---
+
+% \subsubsection{Cubic Symmetry}
+
+% For cubic materials (orthotropic + 90° rotational symmetry),
+% \[
+% [C] =
+% \begin{bmatrix}
+% C_{11} & C_{12} & C_{12} & 0 & 0 & 0 \\
+% C_{12} & C_{11} & C_{12} & 0 & 0 & 0 \\
+% C_{12} & C_{12} & C_{11} & 0 & 0 & 0 \\
+% 0 & 0 & 0 & C_{44} & 0 & 0 \\
+% 0 & 0 & 0 & 0 & C_{44} & 0 \\
+% 0 & 0 & 0 & 0 & 0 & C_{44}
+% \end{bmatrix}
+% \]
+% Cubic symmetry reduces the constants to **3 independent moduli**:  
+% \(C_{11}\), \(C_{12}\), and \(C_{44}\).
+
+% ---
+
+% \subsubsection{Isotropic Symmetry}
+
+% In isotropic materials, the stiffness matrix depends only on two constants:
+% \[
+% [C] =
+% \begin{bmatrix}
+% C_{11} & C_{12} & C_{12} & 0 & 0 & 0 \\
+% C_{12} & C_{11} & C_{12} & 0 & 0 & 0 \\
+% C_{12} & C_{12} & C_{11} & 0 & 0 & 0 \\
+% 0 & 0 & 0 & \tfrac{1}{2}(C_{11}-C_{12}) & 0 & 0 \\
+% 0 & 0 & 0 & 0 & \tfrac{1}{2}(C_{11}-C_{12}) & 0 \\
+% 0 & 0 & 0 & 0 & 0 & \tfrac{1}{2}(C_{11}-C_{12})
+% \end{bmatrix}
+% \]
+
+% If we define the **Lamé constants**:
+% \[
+% C_{11} = \lambda + 2\mu, \qquad C_{12} = \lambda,
+% \]
+% then
+% \[
+% [C] =
+% \begin{bmatrix}
+% \lambda+2\mu & \lambda & \lambda & 0 & 0 & 0 \\
+% \lambda & \lambda+2\mu & \lambda & 0 & 0 & 0 \\
+% \lambda & \lambda & \lambda+2\mu & 0 & 0 & 0 \\
+% 0 & 0 & 0 & \mu & 0 & 0 \\
+% 0 & 0 & 0 & 0 & \mu & 0 \\
+% 0 & 0 & 0 & 0 & 0 & \mu
+% \end{bmatrix}
+% \]
+% Thus, **isotropic solids** are completely described by only two independent elastic constants,  
+% the Lamé parameters \( \lambda \) and \( \mu \).
+
+% ---
+
+% \subsection{Summary of Elastic Symmetry Classes}
+
+% \begingroup
+% \setlength{\tabcolsep}{8pt}
+% \renewcommand{\arraystretch}{1.15}
+% \begin{center}
+% \begin{tabular}{@{} l c l @{}}
+% \toprule
+% \textbf{Symmetry Type} & \textbf{Independent Constants} & \textbf{Typical Examples} \\
+% \midrule
+% Triclinic (anisotropic) & 21 & General crystal \\[4pt]
+% Monoclinic & 13 & Single-plane symmetric composites \\[4pt]
+% Orthotropic & 9 & Wood, composites, rolled metals \\[4pt]
+% Cubic & 3 & Metals (Al, Cu, Fe) \\[4pt]
+% Isotropic & 2 & Rubber, glass, polycrystals \\
+% \bottomrule
+% \end{tabular}
+% \end{center}
+% \endgroup
+
+% \subsection{Generalized Hooke’s Law (Isotropic Form)}
+
+% \[
+% \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk} + 2\mu\,\varepsilon_{ij}
+% \]
+% \[
+% E = \frac{\mu(3\lambda + 2\mu)}{\lambda + \mu},
+% \quad
+% \nu = \frac{\lambda}{2(\lambda + \mu)}.
+% \]
+
+\section*{Material Symmetry and Isotropic Elasticity}
+
+\subsection{Matrix Notation and Elastic Symmetry}
+
+\subsubsection{Matrix (Voigt) Notation}
+
+Stress and strain tensors are written with a single index running from 1 to 6:
+\[
+\begin{array}{c|c}
+\text{Tensor Components} & \text{Matrix Form (Voigt)} \\ \hline
+\sigma_{11} = \sigma_1 & \varepsilon_{11} = \varepsilon_1 \\
+\sigma_{22} = \sigma_2 & \varepsilon_{22} = \varepsilon_2 \\
+\sigma_{33} = \sigma_3 & \varepsilon_{33} = \varepsilon_3 \\
+\sigma_{23} = \sigma_4 & \varepsilon_{23} = \varepsilon_4 \\
+\sigma_{31} = \sigma_5 & \varepsilon_{31} = \varepsilon_5 \\
+\sigma_{12} = \sigma_6 & \varepsilon_{12} = \varepsilon_6
+\end{array}
+\]
+
+The tensor relation
+\[
+\sigma_{ij} = C_{ijkl}\varepsilon_{kl}
+\]
+becomes, in matrix form,
+\[
+\sigma_m = C_{mn}\varepsilon_n, \qquad m,n = 1,\dots,6.
+\]
+
+Equivalently in vector form:
+\begin{align}
+\bm{\sigma} &=
+\begin{bmatrix}
+\sigma_{11} & \sigma_{22} & \sigma_{33} & \sigma_{23} & \sigma_{31} & \sigma_{12}
+\end{bmatrix}^{\mathsf{T}},\\
+\bm{\varepsilon} &=
+\begin{bmatrix}
+\varepsilon_{11} & \varepsilon_{22} & \varepsilon_{33} & 2\varepsilon_{23} & 2\varepsilon_{31} & 2\varepsilon_{12}
+\end{bmatrix}^{\mathsf{T}}.
+\end{align}
+
+Thus the constitutive law becomes
+\[
+\bm{\sigma} = \mathbf{C}\,\bm{\varepsilon}.
+\]
+
+---
+
+\subsubsection{Plane of Elastic Symmetry (Monoclinic)}
+
+If the material has one plane of elastic symmetry (e.g.\ symmetry about the $x_3$-axis),  
+the stiffness matrix takes the form:
+\[
+[C] =
+\begin{bmatrix}
+C_{11} & C_{12} & C_{13} & 0 & 0 & C_{16} \\
+C_{12} & C_{22} & C_{23} & 0 & 0 & C_{26} \\
+C_{13} & C_{23} & C_{33} & 0 & 0 & C_{36} \\
+0 & 0 & 0 & C_{44} & C_{45} & 0 \\
+0 & 0 & 0 & C_{45} & C_{55} & 0 \\
+C_{16} & C_{26} & C_{36} & 0 & 0 & C_{66}
+\end{bmatrix}
+\]
+This structure corresponds to **13 independent elastic constants.**
+
+The principal axes of stress generally do *not* coincide with principal axes of strain, even if shear stresses vanish.
+
+---
+
+\subsubsection{Orthotropic Symmetry}
+
+Materials with three orthogonal planes of symmetry have:
+\[
+[C] =
+\begin{bmatrix}
+C_{11} & C_{12} & C_{13} & 0 & 0 & 0 \\
+C_{12} & C_{22} & C_{23} & 0 & 0 & 0 \\
+C_{13} & C_{23} & C_{33} & 0 & 0 & 0 \\
+0 & 0 & 0 & C_{44} & 0 & 0 \\
+0 & 0 & 0 & 0 & C_{55} & 0 \\
+0 & 0 & 0 & 0 & 0 & C_{66}
+\end{bmatrix}
+\]
+
+This case has **9 independent constants.**
+
+---
+
+\subsubsection{Cubic Symmetry}
+
+Imposing 90° rotational symmetry:
+\[
+[C] =
+\begin{bmatrix}
+C_{11} & C_{12} & C_{12} & 0 & 0 & 0 \\
+C_{12} & C_{11} & C_{12} & 0 & 0 & 0 \\
+C_{12} & C_{12} & C_{11} & 0 & 0 & 0 \\
+0 & 0 & 0 & C_{44} & 0 & 0 \\
+0 & 0 & 0 & 0 & C_{44} & 0 \\
+0 & 0 & 0 & 0 & 0 & C_{44}
+\end{bmatrix}
+\]
+
+Only **3 independent moduli** remain:  
+\(C_{11},\, C_{12},\, C_{44}\).
+
+---
+
+\subsubsection{Isotropic Symmetry}
+
+An isotropic solid has infinitely many planes of symmetry.  
+The stiffness matrix reduces to:
+\[
+[C] =
+\begin{bmatrix}
+\lambda+2\mu & \lambda & \lambda & 0 & 0 & 0 \\
+\lambda & \lambda+2\mu & \lambda & 0 & 0 & 0 \\
+\lambda & \lambda & \lambda+2\mu & 0 & 0 & 0 \\
+0 & 0 & 0 & \mu & 0 & 0 \\
+0 & 0 & 0 & 0 & \mu & 0 \\
+0 & 0 & 0 & 0 & 0 & \mu
+\end{bmatrix}
+\]
+
+Thus isotropy is fully described by the **two Lamé constants** \( \lambda \) and \( \mu \).
+
+---
+
+\subsection{Summary of Elastic Symmetry Classes}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l c l @{}}
+\toprule
+\textbf{Symmetry Type} & \textbf{Independent Constants} & \textbf{Typical Examples} \\
+\midrule
+Triclinic (anisotropic) & 21 & General crystal \\
+Monoclinic & 13 & Laminated composites \\
+Orthotropic & 9 & Wood, composites, rolled metals \\
+Cubic & 3 & Polycrystalline metals \\
+Isotropic & 2 & Rubber, glass, polycrystals \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+---
+
+\subsection{Isotropic Fourth-Order Tensor}
+
+The general isotropic elasticity tensor is:
+\[
+C_{ijkl}
+= \lambda\,\delta_{ij}\delta_{kl}
++ \mu\left(\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk}\right),
+\]
+with the constitutive relation:
+\[
+\sigma_{ij} = \lambda \varepsilon_{kk}\delta_{ij} + 2\mu \varepsilon_{ij}.
+\]
+
+---
+
+\subsection{Lamé Constants and Engineering Moduli}
+
+\[
+\lambda = \text{first Lamé parameter}, \qquad 
+\mu = \text{shear modulus}.
+\]
+
+\[
+K = \lambda + \frac{2}{3}\mu, \qquad
+E = \frac{\mu(3\lambda + 2\mu)}{\lambda + \mu}, \qquad
+\nu = \frac{\lambda}{2(\lambda + \mu)}.
+\]
+
+Inverted:
+\[
+\mu = \frac{E}{2(1+\nu)}, \qquad
+K = \frac{E}{3(1-2\nu)}.
+\]
+
+---
+
+\subsection{Uniaxial Loading and Incompressibility}
+
+Given
+\[
+\sigma_{11}=\sigma,\qquad \sigma_{22}=\sigma_{33}=0,
+\]
+the strains are:
+\[
+\varepsilon_{11} = \frac{\sigma}{E}, \qquad
+\varepsilon_{22}=\varepsilon_{33} = -\nu\frac{\sigma}{E}.
+\]
+
+Incompressibility requires:
+\[
+\varepsilon_{kk}=0 \;\Rightarrow\; \nu \to \tfrac{1}{2}.
+\]
+
+---
+
+\subsection{Wave Speed and Elastic Modulus (Sonic Test)}
+
+Longitudinal wave speed in an isotropic rod:
+\[
+c_L = \sqrt{\frac{E(1-\nu)}{\rho(1+\nu)(1-2\nu)}}.
+\]
+
+Useful for extracting \(E\) experimentally from measured \(c_L\).
+
+---
+\subsection{Isotropic Linear Elasticity}
+
+---
+
+\subsubsection{Isotropic Material Tensor Form}
+
+For an isotropic material, the stiffness tensor \( C_{ijkl} \) satisfies:
+\[
+C_{ijkl} = Q_{ip} Q_{jq} Q_{kr} Q_{ls} C_{pqrs} \quad \forall Q \in SO(3)
+\]
+This implies \( C_{ijkl} \) must be an **isotropic fourth-order tensor**, expressible as:
+\[
+\boxed{
+C_{ijkl} = \lambda \, \delta_{ij}\delta_{kl} + \mu \, (\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk})
+}
+\]
+
+Thus, the **constitutive law** (Hooke’s law) becomes:
+\[
+\sigma_{ij} = C_{ijkl} \, \varepsilon_{kl} = \lambda \, \varepsilon_{kk}\delta_{ij} + 2\mu \, \varepsilon_{ij}
+\]
+
+---
+
+\subsubsection{Simplified Form and Interpretation}
+
+\[
+\boxed{
+\sigma_{ij} = \lambda (\nabla \cdot \mathbf{u})\delta_{ij} + 2\mu \varepsilon_{ij}
+}
+\]
+where \( \varepsilon_{ij} = \tfrac{1}{2}(u_{i,j} + u_{j,i}) \) is the infinitesimal strain tensor.
+
+For hydrostatic stress,
+\[
+\sigma_{m} = \frac{1}{3}(\sigma_{11} + \sigma_{22} + \sigma_{33})
+\quad \Rightarrow \quad
+\frac{\sigma_{m}}{3} = K \varepsilon_{m}
+\]
+where \( K \) is the **bulk modulus**:
+\[
+\boxed{
+K = \lambda + \tfrac{2}{3}\mu
+}
+\]
+
+The pressure \( p = -\tfrac{1}{3}\sigma_{kk} \) is related to volumetric strain:
+\[
+p = -K \, \frac{\Delta V}{V}
+\]
+
+---
+
+\subsubsection{Axial Strain Relations}
+
+For uniaxial tension in the \(x_1\)-direction:
+\[
+\varepsilon_{11} = \frac{\sigma_{11}}{E}, \qquad
+\varepsilon_{22} = \varepsilon_{33} = -\nu \frac{\sigma_{11}}{E}
+\]
+where:
+\[
+E = \text{Young’s modulus}, \quad \nu = \text{Poisson’s ratio}.
+\]
+
+---
+
+\subsubsection{General 3D Relations}
+
+For principal stresses \(\sigma_1, \sigma_2, \sigma_3\):
+\[
+\boxed{
+\begin{aligned}
+\varepsilon_1 &= \frac{1}{E}\left[\sigma_1 - \nu(\sigma_2 + \sigma_3)\right], \\
+\varepsilon_2 &= \frac{1}{E}\left[\sigma_2 - \nu(\sigma_3 + \sigma_1)\right], \\
+\varepsilon_3 &= \frac{1}{E}\left[\sigma_3 - \nu(\sigma_1 + \sigma_2)\right].
+\end{aligned}
+}
+\]
+For hydrostatic stress:
+\[
+\varepsilon_{ij} = \frac{1+\nu}{E}\sigma_{ij} - \frac{\nu}{E}\sigma_{kk}\delta_{ij}
+\]
+and equivalently,
+\[
+\sigma_{ij} = \frac{E}{(1+\nu)(1-2\nu)}\left[(1-\nu)\varepsilon_{ij} + \nu\varepsilon_{kk}\delta_{ij}\right].
+\]
+
+---
+
+\subsubsection{Relations Between Elastic Moduli}
+
+All isotropic moduli are related as:
+\[
+\boxed{
+\begin{aligned}
+E &= \frac{\mu(3\lambda + 2\mu)}{\lambda + \mu}, \\
+\nu &= \frac{\lambda}{2(\lambda + \mu)}, \\
+K &= \lambda + \tfrac{2}{3}\mu, \\
+\mu &= \frac{E}{2(1+\nu)}, \\
+K &= \frac{E}{3(1-2\nu)}.
+\end{aligned}
+}
+\]
+Only two of these are **independent**.
+
+---
+
+\subsubsection{Incompressible Limit}
+
+For incompressible materials:
+\[
+\varepsilon_{11} + \varepsilon_{22} + \varepsilon_{33} = 0,
+\quad \nu = \tfrac{1}{2},
+\quad K \to \infty.
+\]
+Then:
+\[
+\sigma_{ij} = -p\,\delta_{ij} + 2\mu \varepsilon_{ij}
+\]
+where \(p\) acts as a **Lagrange multiplier** enforcing incompressibility.
+
+---
+
+\subsubsection{Boundary Value Problem (BVP)}
+
+For infinitesimal linear elasticity:
+
+\[
+\begin{cases}
+\sigma_{ij,j} + b_i = 0 & \text{in } V, \\
+\sigma_{ij} = 2\mu \varepsilon_{ij} + \lambda \varepsilon_{kk}\delta_{ij}, \\
+\varepsilon_{ij} = \tfrac{1}{2}(u_{i,j} + u_{j,i}),
+\end{cases}
+\]
+
+with boundary conditions:
+\[
+\begin{cases}
+u_i = \bar{u}_i & \text{on } S_u \quad (\text{displacement BC}),\\
+t_i = \sigma_{ij}n_j = \bar{t}_i & \text{on } S_t \quad (\text{traction BC}),
+\end{cases}
+\]
+where \(S = S_u \cup S_t\).
+
+This gives:
+- \(15\) unknowns: \(u_i, \varepsilon_{ij}, \sigma_{ij}\),
+- \(15\) equations: \(6\) kinematic + \(6\) constitutive + \(3\) equilibrium.
+
+\[
+\boxed{
+\text{Total BVP: } 
+\begin{cases}
+\sigma_{ij,j} + b_i = 0, \\
+\sigma_{ij} = \lambda \varepsilon_{kk}\delta_{ij} + 2\mu \varepsilon_{ij}, \\
+\varepsilon_{ij} = \tfrac{1}{2}(u_{i,j} + u_{j,i}).
+\end{cases}
+}
+\]
+
+---
+
+\subsection{Summary}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Name} \\
+\midrule
+$E$ & Young’s modulus & Axial stiffness \\[4pt]
+$\nu$ & Poisson’s ratio & Lateral contraction \\[4pt]
+$\lambda$ & 1st Lamé constant & Volumetric response \\[4pt]
+$\mu$ & 2nd Lamé constant & Shear modulus \\[4pt]
+$K$ & $\displaystyle \lambda + \frac{2}{3}\mu$ & Bulk modulus \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+
+\noindent\textbf{Note:} Only two of these constants are independent for an isotropic solid.---
+
+\subsection{Boundary Value Problems in Linear Elasticity}
+
+---
+
+\subsubsection{Types of Boundary Conditions}
+
+\begin{itemize}
+\item \textbf{Displacement BVP:} 
+  \[
+  S_u = S, \quad S_t = 0
+  \]
+  Displacements \( u_i \) are prescribed on the entire boundary.
+
+\item \textbf{Traction BVP:}
+  \[
+  S_t = S, \quad S_u = 0
+  \]
+  Surface tractions \( T_i \) are prescribed on the entire boundary.
+
+\item \textbf{Mixed BVP:}
+  At each boundary point, specify either the displacement or the traction (but not both).  
+  For example:
+  \[
+  \text{At one point: } T_1,\, u_2,\, u_3 \quad \text{and at another: } u_1,\, T_2,\, T_3.
+  \]
+\end{itemize}
+
+---
+
+\subsection{Example: Uniform Pressure on a 3D Body}
+
+Consider a traction BVP under a uniform hydrostatic pressure \( P \).
+
+\[
+T_i^{(S)} = -P n_i
+\]
+
+\[
+\text{Guess: } \sigma_{ij} = -P \delta_{ij}
+\quad \Rightarrow \quad
+[\sigma] =
+\begin{bmatrix}
+-P & 0 & 0 \\
+0 & -P & 0 \\
+0 & 0 & -P
+\end{bmatrix}
+\]
+
+---
+
+\subsubsection{Boundary Conditions}
+
+Cauchy’s relationship:
+\[
+T_i = \sigma_{ij} n_j = -P n_i
+\]
+is satisfied.
+
+---
+
+\subsubsection{Equilibrium Equation}
+
+\[
+\sigma_{ij,j} + b_i = 0
+\]
+\[
+(-P \delta_{ij})_{,j} = 0 \quad \Rightarrow \quad 0 = 0 \quad \checkmark
+\]
+
+---
+
+\subsubsection{Constitutive Equations}
+
+For isotropic linear elasticity:
+\[
+\varepsilon_{ij} = \frac{1+\nu}{E}\sigma_{ij} - \frac{\nu}{E}\sigma_{kk}\delta_{ij}
+\]
+Substitute \(\sigma_{ij} = -P \delta_{ij}\):
+\[
+\varepsilon_{ij} = \frac{1+\nu}{E}(-P \delta_{ij}) - \frac{\nu}{E}(-3P)\delta_{ij}
+= -\frac{P}{3K}\delta_{ij}
+\]
+with \( K = \frac{E}{3(1-2\nu)} \) the **bulk modulus**.
+
+Thus:
+\[
+\boxed{
+[\varepsilon] =
+\begin{bmatrix}
+-\frac{P}{3K} & 0 & 0 \\
+0 & -\frac{P}{3K} & 0 \\
+0 & 0 & -\frac{P}{3K}
+\end{bmatrix}
+}
+\]
+
+---
+
+\subsubsection{Compatibility}
+
+Yes — since the compatibility equations involve only second derivatives of \(\varepsilon_{ij}\),  
+and \(\varepsilon_{ij}\) is constant, they are automatically satisfied.
+
+---
+
+\subsubsection{Displacements}
+
+From \(\varepsilon_{ii} = \partial u_i / \partial x_i = \alpha\):
+\[
+\alpha = -\frac{P}{3K}
+\]
+Integrating:
+\[
+u_i = \alpha x_i + A_i(x_j,x_k)
+\]
+and requiring no shear strains:
+\[
+2\varepsilon_{ij} = u_{i,j} + u_{j,i} = 0
+\]
+implies \( A_i \) are constants or linear in coordinates,  
+corresponding to **rigid body translations and rotations**.
+
+Hence:
+\[
+\boxed{
+u_i = -\frac{P}{3K}x_i + \text{(rigid motion)}
+}
+\]
+
+---
+
+\subsubsection{6. Volume Change}
+
+\[
+\Delta V = \int_V \varepsilon_{kk}\, dV
+= 3\left(-\frac{P}{3K}\right) V
+= -\frac{P}{K}V
+\]
+
+Thus, the **fractional volume change** is:
+\[
+\boxed{
+\frac{\Delta V}{V} = -\frac{P}{K}
+}
+\]
+consistent with the definition of the bulk modulus.
+
+---
+
+\subsection{Uniqueness of Solution}
+
+The solution is **unique** because the strain energy density is **positive definite**:
+\[
+W = \tfrac{1}{2} C_{ijkl}\varepsilon_{ij}\varepsilon_{kl} > 0, \quad \forall \varepsilon_{ij} \neq 0.
+\]
+For isotropic elasticity, this implies:
+\[
+\mu > 0, \qquad 3\lambda + 2\mu > 0.
+\]
+
+In terms of \(E\) and \(\nu\):
+\[
+E > 0, \quad -1 < \nu < \tfrac{1}{2}.
+\]
+If \(E \le 0\) or \(\nu \notin (-1, \tfrac{1}{2})\), the strain energy would not be positive definite.
+
+---
+
+
+---
+
+\subsection{Summary}
+
+\begingroup
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabular}{@{} l l l @{}}
+\toprule
+\textbf{Concept} & \textbf{Expression} & \textbf{Notes} \\
+\midrule
+Constitutive law & 
+$\displaystyle \sigma_{ij} = \lambda \varepsilon_{kk}\delta_{ij} + 2\mu \varepsilon_{ij}$ & 
+Linear isotropic elasticity \\[4pt]
+
+Bulk modulus & 
+$\displaystyle K = \lambda + \frac{2}{3}\mu$ & 
+Relates hydrostatic stress to volumetric strain \\[4pt]
+
+Hydrostatic solution & 
+$\displaystyle \sigma_{ij} = -P\delta_{ij}, \quad \varepsilon_{ij} = -\frac{P}{3K}\delta_{ij}$ & 
+Uniform compression \\[4pt]
+
+Volume change & 
+$\displaystyle \frac{\Delta V}{V} = -\frac{P}{K}$ & 
+Consistent with definition of $K$ \\[4pt]
+
+Uniqueness & 
+$\displaystyle E>0, \quad -1<\nu<\tfrac{1}{2}$ & 
+Positive-definiteness condition \\
+\bottomrule
+\end{tabular}
+\end{center}
+\endgroup
+\end{document}
